@@ -9,7 +9,7 @@ pip install -r requirements.txt
 ```
 
 ## Dataset
-The dataset used in LightRAG can be downloaded from [TommyChien/UltraDomain](https://huggingface.co/datasets/TommyChien/UltraDomain). to `datasets/ultradomain/agriculture[cs,legal,mix].json`.
+The dataset used in HyperGraphRAG can be downloaded from [TommyChien/UltraDomain](https://huggingface.co/datasets/TommyChien/UltraDomain). to `datasets/ultradomain/agriculture[cs,legal,mix].json`.
 
 ## Step-0 Extract Unique Contexts
 ```bash
@@ -17,7 +17,7 @@ python Step_0.py
 ```
 
 ## Step-1 Insert Contexts
-For the extracted contexts, we insert them into the LightRAG system.
+For the extracted contexts, we insert them into the HyperGraphRAG system.
 ```bash
 python Step_1.py
 ```
@@ -29,7 +29,7 @@ python Step_2.py
 ```
 
 ## Step-3 Query
-For the queries generated in Step-2, we will extract them and query LightRAG.
+For the queries generated in Step-2, we will extract them and query HyperGraphRAG.
 ```bash
 python Step_3.py
 ```

@@ -15,7 +15,7 @@ import xml.etree.ElementTree as ET
 import numpy as np
 import tiktoken
 
-from lightrag.prompt import PROMPTS
+from hypergraphrag.prompt import PROMPTS
 
 
 class UnlimitedSemaphore:
@@ -30,7 +30,7 @@ class UnlimitedSemaphore:
 
 ENCODER = None
 
-logger = logging.getLogger("lightrag")
+logger = logging.getLogger("hypergraphrag")
 
 
 def set_logger(log_file: str):

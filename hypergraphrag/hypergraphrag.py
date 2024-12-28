@@ -107,9 +107,9 @@ def always_get_an_event_loop() -> asyncio.AbstractEventLoop:
 
 
 @dataclass
-class LightRAG:
+class HyperGraphRAG:
     working_dir: str = field(
-        default_factory=lambda: f"./lightrag_cache_{datetime.now().strftime('%Y-%m-%d-%H:%M:%S')}"
+        default_factory=lambda: f"hypergraphrag_cache_{datetime.now().strftime('%Y-%m-%d-%H:%M:%S')}"
     )
     # Default not to use embedding cache
     embedding_cache_config: dict = field(
@@ -170,14 +170,14 @@ class LightRAG:
     convert_response_to_json_func: callable = convert_response_to_json
 
     def __post_init__(self):
-        log_file = os.path.join("lightrag.log")
+        log_file = os.path.join("hypergraphrag.log")
         set_logger(log_file)
         logger.setLevel(self.log_level)
 
         logger.info(f"Logger initialized for working directory: {self.working_dir}")
 
         _print_config = ",\n  ".join([f"{k} = {v}" for k, v in asdict(self).items()])
-        logger.debug(f"LightRAG init with param:\n  {_print_config}\n")
+        logger.debug(f"HyperGraphRAG init with param:\n  {_print_config}\n")
 
         # @TODO: should move all storage setup here to leverage initial start params attached to self.
 

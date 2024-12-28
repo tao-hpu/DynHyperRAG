@@ -163,7 +163,7 @@ cython_debug/
 *.egg-info
 dickens/
 book.txt
-lightrag-dev/
+hypergraphrag-dev/
 .idea/
 dist/
 env/
@@ -176,7 +176,7 @@ ignore_this.txt
 gui/
 *.log
 datasets/*
-expr/*
-output/*
+expr*
+output*
 openai_api_key.txt
 examples/*

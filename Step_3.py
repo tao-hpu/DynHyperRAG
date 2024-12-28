@@ -1,7 +1,7 @@
 import re
 import json
 import asyncio
-from lightrag import LightRAG, QueryParam
+from hypergraphrag import HyperGraphRAG, QueryParam
 from tqdm import tqdm
 import os
 os.environ["OPENAI_API_KEY"] = open("openai_api_key.txt").read().strip()
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     mode = "hybrid"
     WORKING_DIR = f"expr/ultradoman/{cls}"
 
-    rag = LightRAG(working_dir=WORKING_DIR)
+    rag = HyperGraphRAG(working_dir=WORKING_DIR)
     query_param = QueryParam(mode=mode)
 
     queries = extract_queries(f"datasets/ultradoman/questions/{cls}_questions.txt")

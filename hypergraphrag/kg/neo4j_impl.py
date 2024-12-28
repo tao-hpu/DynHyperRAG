@@ -3,7 +3,7 @@ import os
 from dataclasses import dataclass
 from typing import Any, Union, Tuple, List, Dict
 import inspect
-from lightrag.utils import logger
+from hypergraphrag.utils import logger
 from ..base import BaseGraphStorage
 from neo4j import (
     AsyncGraphDatabase,

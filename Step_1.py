@@ -1,7 +1,7 @@
 import os
 import json
 import time
-from lightrag import LightRAG
+from hypergraphrag import HyperGraphRAG
 
 os.environ["OPENAI_API_KEY"] = open("openai_api_key.txt").read().strip()
 
@@ -29,6 +29,6 @@ WORKING_DIR = f"expr/ultradoman/{cls}"
 if not os.path.exists(WORKING_DIR):
     os.makedirs(WORKING_DIR)
 
-rag = LightRAG(working_dir=WORKING_DIR,embedding_func_max_async=4,llm_model_max_async=4)
+rag = HyperGraphRAG(working_dir=WORKING_DIR,embedding_func_max_async=4,llm_model_max_async=4)
 
 insert_text(rag, f"datasets/ultradoman/unique_contexts/{cls}_unique_contexts.json")

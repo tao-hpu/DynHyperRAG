@@ -7,8 +7,8 @@ import numpy as np
 from sqlalchemy import create_engine, text
 from tqdm import tqdm
 
-from lightrag.base import BaseVectorStorage, BaseKVStorage
-from lightrag.utils import logger
+from hypergraphrag.base import BaseVectorStorage, BaseKVStorage
+from hypergraphrag.utils import logger
 
 
 class TiDB(object):
@@ -312,11 +312,11 @@ class TiDBVectorDBStorage(BaseVectorStorage):
 
 
 N_T = {
-    "full_docs": "LIGHTRAG_DOC_FULL",
-    "text_chunks": "LIGHTRAG_DOC_CHUNKS",
-    "chunks": "LIGHTRAG_DOC_CHUNKS",
-    "entities": "LIGHTRAG_GRAPH_NODES",
-    "relationships": "LIGHTRAG_GRAPH_EDGES",
+    "full_docs": "HYPERGRAPHRAG_DOC_FULL",
+    "text_chunks": "HYPERGRAPHRAG_DOC_CHUNKS",
+    "chunks": "HYPERGRAPHRAG_DOC_CHUNKS",
+    "entities": "HYPERGRAPHRAG_GRAPH_NODES",
+    "relationships": "HYPERGRAPHRAG_GRAPH_EDGES",
 }
 N_ID = {
     "full_docs": "doc_id",
@@ -327,9 +327,9 @@ N_ID = {
 }
 
 TABLES = {
-    "LIGHTRAG_DOC_FULL": {
+    "HYPERGRAPHRAG_DOC_FULL": {
         "ddl": """
-        CREATE TABLE LIGHTRAG_DOC_FULL (
+        CREATE TABLE HYPERGRAPHRAG_DOC_FULL (
             `id` BIGINT PRIMARY KEY AUTO_RANDOM,
             `doc_id` VARCHAR(256) NOT NULL,
             `workspace` varchar(1024),
@@ -341,9 +341,9 @@ TABLES = {
         );
         """
     },
-    "LIGHTRAG_DOC_CHUNKS": {
+    "HYPERGRAPHRAG_DOC_CHUNKS": {
         "ddl": """
-        CREATE TABLE LIGHTRAG_DOC_CHUNKS (
+        CREATE TABLE HYPERGRAPHRAG_DOC_CHUNKS (
             `id` BIGINT PRIMARY KEY AUTO_RANDOM,
             `chunk_id` VARCHAR(256) NOT NULL,
             `full_doc_id` VARCHAR(256) NOT NULL,
@@ -358,9 +358,9 @@ TABLES = {
         );
         """
     },
-    "LIGHTRAG_GRAPH_NODES": {
+    "HYPERGRAPHRAG_GRAPH_NODES": {
         "ddl": """
-        CREATE TABLE LIGHTRAG_GRAPH_NODES (
+        CREATE TABLE HYPERGRAPHRAG_GRAPH_NODES (
             `id` BIGINT PRIMARY KEY AUTO_RANDOM,
             `entity_id`  VARCHAR(256) NOT NULL,
             `workspace` varchar(1024),
@@ -373,9 +373,9 @@ TABLES = {
         );
         """
     },
-    "LIGHTRAG_GRAPH_EDGES": {
+    "HYPERGRAPHRAG_GRAPH_EDGES": {
         "ddl": """
-        CREATE TABLE LIGHTRAG_GRAPH_EDGES (
+        CREATE TABLE HYPERGRAPHRAG_GRAPH_EDGES (
             `id` BIGINT PRIMARY KEY AUTO_RANDOM,
             `relation_id`  VARCHAR(256) NOT NULL,
             `workspace` varchar(1024),
@@ -389,9 +389,9 @@ TABLES = {
         );
         """
     },
-    "LIGHTRAG_LLM_CACHE": {
+    "HYPERGRAPHRAG_LLM_CACHE": {
         "ddl": """
-        CREATE TABLE LIGHTRAG_LLM_CACHE (
+        CREATE TABLE HYPERGRAPHRAG_LLM_CACHE (
             id BIGINT PRIMARY KEY AUTO_INCREMENT,
             send TEXT,
             return TEXT,
@@ -406,19 +406,19 @@ TABLES = {
 
 SQL_TEMPLATES = {
     # SQL for KVStorage
-    "get_by_id_full_docs": "SELECT doc_id as id, IFNULL(content, '') AS content FROM LIGHTRAG_DOC_FULL WHERE doc_id = :id AND workspace = :workspace",
-    "get_by_id_text_chunks": "SELECT chunk_id as id, tokens, IFNULL(content, '') AS content, chunk_order_index, full_doc_id FROM LIGHTRAG_DOC_CHUNKS WHERE chunk_id = :id AND workspace = :workspace",
-    "get_by_ids_full_docs": "SELECT doc_id as id, IFNULL(content, '') AS content FROM LIGHTRAG_DOC_FULL WHERE doc_id IN ({ids}) AND workspace = :workspace",
-    "get_by_ids_text_chunks": "SELECT chunk_id as id, tokens, IFNULL(content, '') AS content, chunk_order_index, full_doc_id FROM LIGHTRAG_DOC_CHUNKS WHERE chunk_id IN ({ids}) AND workspace = :workspace",
+    "get_by_id_full_docs": "SELECT doc_id as id, IFNULL(content, '') AS content FROM HYPERGRAPHRAG_DOC_FULL WHERE doc_id = :id AND workspace = :workspace",
+    "get_by_id_text_chunks": "SELECT chunk_id as id, tokens, IFNULL(content, '') AS content, chunk_order_index, full_doc_id FROM HYPERGRAPHRAG_DOC_CHUNKS WHERE chunk_id = :id AND workspace = :workspace",
+    "get_by_ids_full_docs": "SELECT doc_id as id, IFNULL(content, '') AS content FROM HYPERGRAPHRAG_DOC_FULL WHERE doc_id IN ({ids}) AND workspace = :workspace",
+    "get_by_ids_text_chunks": "SELECT chunk_id as id, tokens, IFNULL(content, '') AS content, chunk_order_index, full_doc_id FROM HYPERGRAPHRAG_DOC_CHUNKS WHERE chunk_id IN ({ids}) AND workspace = :workspace",
     "filter_keys": "SELECT {id_field} AS id FROM {table_name} WHERE {id_field} IN ({ids}) AND workspace = :workspace",
     # SQL for Merge operations (TiDB version with INSERT ... ON DUPLICATE KEY UPDATE)
     "upsert_doc_full": """
-        INSERT INTO LIGHTRAG_DOC_FULL (doc_id, content, workspace)
+        INSERT INTO HYPERGRAPHRAG_DOC_FULL (doc_id, content, workspace)
         VALUES (:id, :content, :workspace)
         ON DUPLICATE KEY UPDATE content = VALUES(content), workspace = VALUES(workspace), updatetime = CURRENT_TIMESTAMP
         """,
     "upsert_chunk": """
-        INSERT INTO LIGHTRAG_DOC_CHUNKS(chunk_id, content, tokens, chunk_order_index, full_doc_id, content_vector, workspace)
+        INSERT INTO HYPERGRAPHRAG_DOC_CHUNKS(chunk_id, content, tokens, chunk_order_index, full_doc_id, content_vector, workspace)
         VALUES (:id, :content, :tokens, :chunk_order_index, :full_doc_id, :content_vector, :workspace)
         ON DUPLICATE KEY UPDATE
         content = VALUES(content), tokens = VALUES(tokens), chunk_order_index = VALUES(chunk_order_index),
@@ -427,25 +427,25 @@ SQL_TEMPLATES = {
     # SQL for VectorStorage
     "entities": """SELECT n.name as entity_name FROM
         (SELECT entity_id as id, name, VEC_COSINE_DISTANCE(content_vector,:embedding_string) as distance
-        FROM LIGHTRAG_GRAPH_NODES WHERE workspace = :workspace) n
+        FROM HYPERGRAPHRAG_GRAPH_NODES WHERE workspace = :workspace) n
         WHERE n.distance>:better_than_threshold ORDER BY n.distance DESC LIMIT :top_k""",
     "relationships": """SELECT e.source_name as src_id, e.target_name as tgt_id FROM
         (SELECT source_name, target_name, VEC_COSINE_DISTANCE(content_vector, :embedding_string) as distance
-        FROM LIGHTRAG_GRAPH_EDGES WHERE workspace = :workspace) e
+        FROM HYPERGRAPHRAG_GRAPH_EDGES WHERE workspace = :workspace) e
         WHERE e.distance>:better_than_threshold ORDER BY e.distance DESC LIMIT :top_k""",
     "chunks": """SELECT c.id FROM
         (SELECT chunk_id as id,VEC_COSINE_DISTANCE(content_vector, :embedding_string) as distance
-        FROM LIGHTRAG_DOC_CHUNKS WHERE workspace = :workspace) c
+        FROM HYPERGRAPHRAG_DOC_CHUNKS WHERE workspace = :workspace) c
         WHERE c.distance>:better_than_threshold ORDER BY c.distance DESC LIMIT :top_k""",
     "upsert_entity": """
-        INSERT INTO LIGHTRAG_GRAPH_NODES(entity_id, name, content, content_vector, workspace)
+        INSERT INTO HYPERGRAPHRAG_GRAPH_NODES(entity_id, name, content, content_vector, workspace)
         VALUES(:id, :name, :content, :content_vector, :workspace)
         ON DUPLICATE KEY UPDATE
         name = VALUES(name), content = VALUES(content), content_vector = VALUES(content_vector),
         workspace = VALUES(workspace), updatetime = CURRENT_TIMESTAMP
         """,
     "upsert_relationship": """
-        INSERT INTO LIGHTRAG_GRAPH_EDGES(relation_id, source_name, target_name, content, content_vector, workspace)
+        INSERT INTO HYPERGRAPHRAG_GRAPH_EDGES(relation_id, source_name, target_name, content, content_vector, workspace)
         VALUES(:id, :source_name, :target_name, :content, :content_vector, :workspace)
         ON DUPLICATE KEY UPDATE
         source_name = VALUES(source_name), target_name = VALUES(target_name), content = VALUES(content),

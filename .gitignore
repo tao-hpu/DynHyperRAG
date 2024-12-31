@@ -180,3 +180,5 @@ expr*
 output*
 openai_api_key.txt
 examples/*
+
+.codegpt

@@ -132,7 +132,7 @@ class HyperGraphRAG:
     tiktoken_model_name: str = "gpt-4o-mini"
 
     # entity extraction
-    entity_extract_max_gleaning: int = 1
+    entity_extract_max_gleaning: int = 2
     entity_summary_to_max_tokens: int = 500
 
     # node embedding
@@ -236,11 +236,11 @@ class HyperGraphRAG:
             embedding_func=self.embedding_func,
             meta_fields={"entity_name"},
         )
-        self.relationships_vdb = self.vector_db_storage_cls(
-            namespace="relationships",
+        self.hyperedges_vdb = self.vector_db_storage_cls(
+            namespace="hyperedges",
             global_config=asdict(self),
             embedding_func=self.embedding_func,
-            meta_fields={"src_id", "tgt_id"},
+            meta_fields={"hyperedge_name"},
         )
         self.chunks_vdb = self.vector_db_storage_cls(
             namespace="chunks",
@@ -333,11 +333,11 @@ class HyperGraphRAG:
                 inserting_chunks,
                 knowledge_graph_inst=self.chunk_entity_relation_graph,
                 entity_vdb=self.entities_vdb,
-                relationships_vdb=self.relationships_vdb,
+                hyperedge_vdb=self.hyperedges_vdb,
                 global_config=asdict(self),
             )
             if maybe_new_kg is None:
-                logger.warning("No new entities and relationships found")
+                logger.warning("No new hyperedges and entities found")
                 return
             self.chunk_entity_relation_graph = maybe_new_kg
 
@@ -354,7 +354,7 @@ class HyperGraphRAG:
             self.text_chunks,
             self.llm_response_cache,
             self.entities_vdb,
-            self.relationships_vdb,
+            self.hyperedges_vdb,
             self.chunks_vdb,
             self.chunk_entity_relation_graph,
         ]:

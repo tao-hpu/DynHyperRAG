@@ -87,8 +87,9 @@ async def _handle_entity_relation_summary(
 async def _handle_single_entity_extraction(
     record_attributes: list[str],
     chunk_key: str,
+    now_hyper_relation: str,
 ):
-    if len(record_attributes) < 4 or record_attributes[0] != '"entity"':
+    if len(record_attributes) < 5 or record_attributes[0] != '"entity"' or now_hyper_relation == "":
         return None
     # add this record as a node in the G
     entity_name = clean_str(record_attributes[1].upper())
@@ -96,39 +97,71 @@ async def _handle_single_entity_extraction(
         return None
     entity_type = clean_str(record_attributes[2].upper())
     entity_description = clean_str(record_attributes[3])
+    weight = (
+        float(record_attributes[-1]) if is_float_regex(record_attributes[-1]) else 50.0
+    )
+    hyper_relation = now_hyper_relation
     entity_source_id = chunk_key
     return dict(
         entity_name=entity_name,
         entity_type=entity_type,
         description=entity_description,
+        weight=weight,
+        hyper_relation=hyper_relation,
         source_id=entity_source_id,
     )
 
 
-async def _handle_single_relationship_extraction(
+async def _handle_single_hyperrelation_extraction(
     record_attributes: list[str],
     chunk_key: str,
 ):
-    if len(record_attributes) < 5 or record_attributes[0] != '"relationship"':
+    if len(record_attributes) < 3 or record_attributes[0] != '"hyper-relation"':
         return None
     # add this record as edge
-    source = clean_str(record_attributes[1].upper())
-    target = clean_str(record_attributes[2].upper())
-    edge_description = clean_str(record_attributes[3])
-
-    edge_keywords = clean_str(record_attributes[4])
+    knowledge_fragment = clean_str(record_attributes[1])
     edge_source_id = chunk_key
     weight = (
         float(record_attributes[-1]) if is_float_regex(record_attributes[-1]) else 1.0
     )
     return dict(
-        src_id=source,
-        tgt_id=target,
+        hyper_relation=knowledge_fragment,
         weight=weight,
-        description=edge_description,
-        keywords=edge_keywords,
         source_id=edge_source_id,
     )
+    
+
+async def _merge_hyperedges_then_upsert(
+    hyperedge_name: str,
+    nodes_data: list[dict],
+    knowledge_graph_inst: BaseGraphStorage,
+    global_config: dict,
+):
+    already_weights = []
+    already_source_ids = []
+
+    already_hyperedge = await knowledge_graph_inst.get_node(hyperedge_name)
+    if already_hyperedge is not None:
+        already_weights.append(already_hyperedge["weight"])
+        already_source_ids.extend(
+            split_string_by_multi_markers(already_hyperedge["source_id"], [GRAPH_FIELD_SEP])
+        )
+
+    weight = sum([dp["weight"] for dp in nodes_data] + already_weights)
+    source_id = GRAPH_FIELD_SEP.join(
+        set([dp["source_id"] for dp in nodes_data] + already_source_ids)
+    )
+    node_data = dict(
+        role = "hyperedge",
+        weight=weight,
+        source_id=source_id,
+    )
+    await knowledge_graph_inst.upsert_node(
+        hyperedge_name,
+        node_data=node_data,
+    )
+    node_data["hyperedge_name"] = hyperedge_name
+    return node_data
 
 
 async def _merge_nodes_then_upsert(
@@ -166,6 +199,7 @@ async def _merge_nodes_then_upsert(
         entity_name, description, global_config
     )
     node_data = dict(
+        role="entity",
         entity_type=entity_type,
         description=description,
         source_id=source_id,
@@ -179,68 +213,47 @@ async def _merge_nodes_then_upsert(
 
 
 async def _merge_edges_then_upsert(
-    src_id: str,
-    tgt_id: str,
-    edges_data: list[dict],
+    entity_name: str,
+    nodes_data: list[dict],
     knowledge_graph_inst: BaseGraphStorage,
     global_config: dict,
 ):
-    already_weights = []
-    already_source_ids = []
-    already_description = []
-    already_keywords = []
-
-    if await knowledge_graph_inst.has_edge(src_id, tgt_id):
-        already_edge = await knowledge_graph_inst.get_edge(src_id, tgt_id)
-        already_weights.append(already_edge["weight"])
-        already_source_ids.extend(
-            split_string_by_multi_markers(already_edge["source_id"], [GRAPH_FIELD_SEP])
-        )
-        already_description.append(already_edge["description"])
-        already_keywords.extend(
-            split_string_by_multi_markers(already_edge["keywords"], [GRAPH_FIELD_SEP])
-        )
-
-    weight = sum([dp["weight"] for dp in edges_data] + already_weights)
-    description = GRAPH_FIELD_SEP.join(
-        sorted(set([dp["description"] for dp in edges_data] + already_description))
-    )
-    keywords = GRAPH_FIELD_SEP.join(
-        sorted(set([dp["keywords"] for dp in edges_data] + already_keywords))
-    )
-    source_id = GRAPH_FIELD_SEP.join(
-        set([dp["source_id"] for dp in edges_data] + already_source_ids)
-    )
-    for need_insert_id in [src_id, tgt_id]:
-        if not (await knowledge_graph_inst.has_node(need_insert_id)):
-            await knowledge_graph_inst.upsert_node(
-                need_insert_id,
-                node_data={
-                    "source_id": source_id,
-                    "description": description,
-                    "entity_type": '"UNKNOWN"',
-                },
+    edge_data = []
+    
+    for node in nodes_data:
+        source_id = node["source_id"]
+        hyper_relation = node["hyper_relation"]
+        weight = node["weight"]
+        
+        already_weights = []
+        already_source_ids = []
+        
+        if await knowledge_graph_inst.has_edge(hyper_relation, entity_name):
+            already_edge = await knowledge_graph_inst.get_edge(hyper_relation, entity_name)
+            already_weights.append(already_edge["weight"])
+            already_source_ids.extend(
+                split_string_by_multi_markers(already_edge["source_id"], [GRAPH_FIELD_SEP])
             )
-    description = await _handle_entity_relation_summary(
-        f"({src_id}, {tgt_id})", description, global_config
-    )
-    await knowledge_graph_inst.upsert_edge(
-        src_id,
-        tgt_id,
-        edge_data=dict(
-            weight=weight,
-            description=description,
-            keywords=keywords,
-            source_id=source_id,
-        ),
-    )
+        
+        weight = sum([weight] + already_weights)
+        source_id = GRAPH_FIELD_SEP.join(
+            set([source_id] + already_source_ids)
+        )
 
-    edge_data = dict(
-        src_id=src_id,
-        tgt_id=tgt_id,
-        description=description,
-        keywords=keywords,
-    )
+        await knowledge_graph_inst.upsert_edge(
+            hyper_relation,
+            entity_name,
+            edge_data=dict(
+                weight=weight,
+                source_id=source_id,
+            ),
+        )
+
+        edge_data.append(dict(
+            src_id=hyper_relation,
+            tgt_id=entity_name,
+            weight=weight,
+        ))
 
     return edge_data
 
@@ -249,7 +262,7 @@ async def extract_entities(
     chunks: dict[str, TextChunkSchema],
     knowledge_graph_inst: BaseGraphStorage,
     entity_vdb: BaseVectorStorage,
-    relationships_vdb: BaseVectorStorage,
+    hyperedge_vdb: BaseVectorStorage,
     global_config: dict,
 ) -> Union[BaseGraphStorage, None]:
     use_llm_func: callable = global_config["llm_model_func"]
@@ -286,7 +299,7 @@ async def extract_entities(
         tuple_delimiter=PROMPTS["DEFAULT_TUPLE_DELIMITER"],
         record_delimiter=PROMPTS["DEFAULT_RECORD_DELIMITER"],
         completion_delimiter=PROMPTS["DEFAULT_COMPLETION_DELIMITER"],
-        entity_types=",".join(entity_types),
+        # entity_types=",".join(entity_types),
         examples=examples,
         language=language,
     )
@@ -332,6 +345,7 @@ async def extract_entities(
 
         maybe_nodes = defaultdict(list)
         maybe_edges = defaultdict(list)
+        now_hyper_relation=""
         for record in records:
             record = re.search(r"\((.*)\)", record)
             if record is None:
@@ -340,20 +354,22 @@ async def extract_entities(
             record_attributes = split_string_by_multi_markers(
                 record, [context_base["tuple_delimiter"]]
             )
-            if_entities = await _handle_single_entity_extraction(
+            if_relation = await _handle_single_hyperrelation_extraction(
                 record_attributes, chunk_key
+            )
+            if if_relation is not None:
+                maybe_edges[if_relation["hyper_relation"]].append(
+                    if_relation
+                )
+                now_hyper_relation = if_relation["hyper_relation"]
+                
+            if_entities = await _handle_single_entity_extraction(
+                record_attributes, chunk_key, now_hyper_relation
             )
             if if_entities is not None:
                 maybe_nodes[if_entities["entity_name"]].append(if_entities)
                 continue
-
-            if_relation = await _handle_single_relationship_extraction(
-                record_attributes, chunk_key
-            )
-            if if_relation is not None:
-                maybe_edges[(if_relation["src_id"], if_relation["tgt_id"])].append(
-                    if_relation
-                )
+            
         already_processed += 1
         already_entities += len(maybe_nodes)
         already_relations += len(maybe_edges)
@@ -382,7 +398,23 @@ async def extract_entities(
         for k, v in m_nodes.items():
             maybe_nodes[k].extend(v)
         for k, v in m_edges.items():
-            maybe_edges[tuple(sorted(k))].extend(v)
+            maybe_edges[k].extend(v)
+            
+    logger.info("Inserting hyperedges into storage...")
+    all_hyperedges_data = []
+    for result in tqdm_async(
+        asyncio.as_completed(
+            [
+                _merge_hyperedges_then_upsert(k, v, knowledge_graph_inst, global_config)
+                for k, v in maybe_edges.items()
+            ]
+        ),
+        total=len(maybe_edges),
+        desc="Inserting hyperedges",
+        unit="entity",
+    ):
+        all_hyperedges_data.append(await result)
+            
     logger.info("Inserting entities into storage...")
     all_entities_data = []
     for result in tqdm_async(
@@ -403,28 +435,38 @@ async def extract_entities(
     for result in tqdm_async(
         asyncio.as_completed(
             [
-                _merge_edges_then_upsert(
-                    k[0], k[1], v, knowledge_graph_inst, global_config
-                )
-                for k, v in maybe_edges.items()
+                _merge_edges_then_upsert(k, v, knowledge_graph_inst, global_config)
+                for k, v in maybe_nodes.items()
             ]
         ),
-        total=len(maybe_edges),
+        total=len(maybe_nodes),
         desc="Inserting relationships",
         unit="relationship",
     ):
         all_relationships_data.append(await result)
 
-    if not len(all_entities_data) and not len(all_relationships_data):
+    if not len(all_hyperedges_data) and not len(all_entities_data) and not len(all_relationships_data):
         logger.warning(
-            "Didn't extract any entities and relationships, maybe your LLM is not working"
+            "Didn't extract any hyperedges and entities, maybe your LLM is not working"
         )
         return None
 
+    if not len(all_hyperedges_data):
+        logger.warning("Didn't extract any hyperedges")
     if not len(all_entities_data):
         logger.warning("Didn't extract any entities")
     if not len(all_relationships_data):
         logger.warning("Didn't extract any relationships")
+
+    if hyperedge_vdb is not None:
+        data_for_vdb = {
+            compute_mdhash_id(dp["hyperedge_name"], prefix="rel-"): {
+                "content": dp["hyperedge_name"],
+                "hyperedge_name": dp["hyperedge_name"],
+            }
+            for dp in all_hyperedges_data
+        }
+        await hyperedge_vdb.upsert(data_for_vdb)
 
     if entity_vdb is not None:
         data_for_vdb = {
@@ -435,20 +477,6 @@ async def extract_entities(
             for dp in all_entities_data
         }
         await entity_vdb.upsert(data_for_vdb)
-
-    if relationships_vdb is not None:
-        data_for_vdb = {
-            compute_mdhash_id(dp["src_id"] + dp["tgt_id"], prefix="rel-"): {
-                "src_id": dp["src_id"],
-                "tgt_id": dp["tgt_id"],
-                "content": dp["keywords"]
-                + dp["src_id"]
-                + dp["tgt_id"]
-                + dp["description"],
-            }
-            for dp in all_relationships_data
-        }
-        await relationships_vdb.upsert(data_for_vdb)
 
     return knowledge_graph_inst
 

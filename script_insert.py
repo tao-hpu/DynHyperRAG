@@ -2,6 +2,7 @@ import os
 import json
 import time
 from hypergraphrag import HyperGraphRAG
+import argparse
 
 os.environ["OPENAI_API_KEY"] = open("openai_api_key.txt").read().strip()
 
@@ -22,8 +23,10 @@ def insert_text(rag, file_path):
     if retries == max_retries:
         print("Insertion failed after exceeding the maximum number of retries")
 
-
-cls = "sample"
+parser = argparse.ArgumentParser()
+parser.add_argument("--cls", type=str, default="sample")
+args = parser.parse_args()
+cls = args.cls
 WORKING_DIR = f"expr/ultradoman/{cls}"
 
 if not os.path.exists(WORKING_DIR):

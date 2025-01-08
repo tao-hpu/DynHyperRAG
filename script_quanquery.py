@@ -4,6 +4,7 @@ import asyncio
 from hypergraphrag import HyperGraphRAG, QueryParam
 from tqdm import tqdm
 import os
+import argparse
 os.environ["OPENAI_API_KEY"] = open("openai_api_key.txt").read().strip()
 
 def extract_queries(file_path):
@@ -63,18 +64,23 @@ def run_queries_and_save_to_json(
 
 
 if __name__ == "__main__":
-    cls = "sample"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--cls", type=str, default="sample")
+    args = parser.parse_args()
+    cls = args.cls
     mode = "hybrid"
     WORKING_DIR = f"expr/ultradoman/{cls}"
 
     rag = HyperGraphRAG(working_dir=WORKING_DIR)
     query_param = QueryParam(mode=mode)
 
-    queries = extract_queries(f"datasets/ultradoman/questions/{cls}_questions.txt")
+    with open(f"datasets/ultradoman/unique_questions/{cls}_unique_questions.json", "r") as f:
+        data = json.load(f)
+    queries = [item["query"] for item in data]
     
-    if not os.path.exists(f"output/ultradoman/{cls}"):
-        os.makedirs(f"output/ultradoman/{cls}")    
+    if not os.path.exists(f"output_quan/ultradoman/{cls}"):
+        os.makedirs(f"output_quan/ultradoman/{cls}")    
     
     run_queries_and_save_to_json(
-        queries, rag, query_param, f"output/ultradoman/{cls}/{cls}_result.json", f"output/ultradoman/{cls}/{cls}_errors.json"
+        queries, rag, query_param, f"output_quan/ultradoman/{cls}/{cls}_result.json", f"output_quan/ultradoman/{cls}/{cls}_errors.json"
     )

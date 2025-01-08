@@ -4,6 +4,7 @@ import jsonlines
 import os
 os.environ["OPENAI_API_KEY"] = open("openai_api_key.txt").read().strip()
 from openai import OpenAI
+import argparse
 
 
 def batch_eval(query_file, result1_file, result2_file, output_file_path, output_score_path):
@@ -23,7 +24,7 @@ def batch_eval(query_file, result1_file, result2_file, output_file_path, output_
     answers2 = [i["result"] for i in answers2]
 
     results = []
-    for i, (query, answer1, answer2) in enumerate(zip(queries[:5], answers1[:5], answers2[:5])):
+    for i, (query, answer1, answer2) in enumerate(zip(queries, answers1, answers2)):
         sys_prompt = """
         ---Role---
         You are an expert tasked with evaluating two answers to the same question based on three criteria: **Comprehensiveness**, **Diversity**, and **Empowerment**.
@@ -188,10 +189,11 @@ def batch_eval(query_file, result1_file, result2_file, output_file_path, output_
     print(f"All scores saved to {output_score_path}")
 
 if __name__ == "__main__":
-    batch_eval(
-        query_file="datasets/ultradoman/questions/sample_questions.txt", 
-        result1_file="output/ultradoman/sample/sample_result.json", 
-        result2_file="output/ultradoman/sample/sample_result.json", 
-        output_file_path="output/ultradoman/sample/batch_eval.jsonl",
-        output_score_path="output/ultradoman/sample/batch_eval_scores.json"
-        )
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--query_file", type=str, default="datasets/ultradoman/questions/sample_questions.txt")
+    parser.add_argument("--result1_file", type=str, default="output_qual/ultradoman/sample/sample_result.json")
+    parser.add_argument("--result2_file", type=str, default="others/lightrag/output_qual/ultradoman/sample/sample_result.json")
+    parser.add_argument("--output_file_path", type=str, default="output_qual/ultradoman/sample/batch_eval.jsonl")
+    parser.add_argument("--output_score_path", type=str, default="output_qual/ultradoman/sample/batch_eval_scores.json")
+    args = parser.parse_args()
+    batch_eval(args.query_file, args.result1_file, args.result2_file, args.output_file_path, args.output_score_path)

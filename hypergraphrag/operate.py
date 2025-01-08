@@ -485,7 +485,7 @@ async def kg_query(
     query,
     knowledge_graph_inst: BaseGraphStorage,
     entities_vdb: BaseVectorStorage,
-    relationships_vdb: BaseVectorStorage,
+    hyperedges_vdb: BaseVectorStorage,
     text_chunks_db: BaseKVStorage[TextChunkSchema],
     query_param: QueryParam,
     global_config: dict,
@@ -499,45 +499,72 @@ async def kg_query(
     )
     if cached_response is not None:
         return cached_response
-
-    example_number = global_config["addon_params"].get("example_number", None)
-    if example_number and example_number < len(PROMPTS["keywords_extraction_examples"]):
-        examples = "\n".join(
-            PROMPTS["keywords_extraction_examples"][: int(example_number)]
-        )
-    else:
-        examples = "\n".join(PROMPTS["keywords_extraction_examples"])
+    
     language = global_config["addon_params"].get(
         "language", PROMPTS["DEFAULT_LANGUAGE"]
     )
+    entity_types = global_config["addon_params"].get(
+        "entity_types", PROMPTS["DEFAULT_ENTITY_TYPES"]
+    )
+    example_number = global_config["addon_params"].get("example_number", None)
+    if example_number and example_number < len(PROMPTS["entity_extraction_examples"]):
+        examples = "\n".join(
+            PROMPTS["entity_extraction_examples"][: int(example_number)]
+        )
+    else:
+        examples = "\n".join(PROMPTS["entity_extraction_examples"])
 
-    # Set mode
-    if query_param.mode not in ["local", "global", "hybrid"]:
-        logger.error(f"Unknown mode {query_param.mode} in kg_query")
-        return PROMPTS["fail_response"]
+    example_context_base = dict(
+        tuple_delimiter=PROMPTS["DEFAULT_TUPLE_DELIMITER"],
+        record_delimiter=PROMPTS["DEFAULT_RECORD_DELIMITER"],
+        completion_delimiter=PROMPTS["DEFAULT_COMPLETION_DELIMITER"],
+        entity_types=",".join(entity_types),
+        language=language,
+    )
+    # add example's format
+    examples = examples.format(**example_context_base)
 
-    # LLM generate keywords
-    kw_prompt_temp = PROMPTS["keywords_extraction"]
-    kw_prompt = kw_prompt_temp.format(query=query, examples=examples, language=language)
-    result = await use_model_func(kw_prompt, keyword_extraction=True)
+    entity_extract_prompt = PROMPTS["entity_extraction"]
+    context_base = dict(
+        tuple_delimiter=PROMPTS["DEFAULT_TUPLE_DELIMITER"],
+        record_delimiter=PROMPTS["DEFAULT_RECORD_DELIMITER"],
+        completion_delimiter=PROMPTS["DEFAULT_COMPLETION_DELIMITER"],
+        # entity_types=",".join(entity_types),
+        examples=examples,
+        language=language,
+    )
+    
+    hint_prompt = entity_extract_prompt.format(
+        **context_base, input_text="{input_text}"
+    ).format(**context_base, input_text=query)
+
+    final_result = await use_model_func(hint_prompt)
+
     logger.info("kw_prompt result:")
-    print(result)
+    print(final_result)
+    hl_keywords, ll_keywords = [], []
     try:
-        # json_text = locate_json_string_body_from_string(result) # handled in use_model_func
-        match = re.search(r"\{.*\}", result, re.DOTALL)
-        if match:
-            result = match.group(0)
-            keywords_data = json.loads(result)
-
-            hl_keywords = keywords_data.get("high_level_keywords", [])
-            ll_keywords = keywords_data.get("low_level_keywords", [])
-        else:
-            logger.error("No JSON-like structure found in the result.")
-            return PROMPTS["fail_response"]
-
+        records = split_string_by_multi_markers(
+            final_result,
+            [context_base["record_delimiter"], context_base["completion_delimiter"]],
+        )
+        for record in records:
+            record = re.search(r"\((.*)\)", record)
+            if record is None:
+                continue
+            record = record.group(1)
+            record_attributes = split_string_by_multi_markers(
+                record, [context_base["tuple_delimiter"]]
+            )
+            if len(record_attributes) == 3 and record_attributes[0] == '"hyper-relation"':
+                hl_keywords.append(clean_str(record_attributes[1]))
+            elif len(record_attributes) == 5 and record_attributes[0] == '"entity"':
+                ll_keywords.append(clean_str(record_attributes[1]).upper())
+            else:
+                continue
     # Handle parsing error
     except json.JSONDecodeError as e:
-        print(f"JSON parsing error: {e} {result}")
+        print(f"JSON parsing error: {e} {final_result}")
         return PROMPTS["fail_response"]
 
     # Handdle keywords missing
@@ -561,7 +588,7 @@ async def kg_query(
         keywords,
         knowledge_graph_inst,
         entities_vdb,
-        relationships_vdb,
+        hyperedges_vdb,
         text_chunks_db,
         query_param,
     )
@@ -612,7 +639,7 @@ async def _build_query_context(
     query: list,
     knowledge_graph_inst: BaseGraphStorage,
     entities_vdb: BaseVectorStorage,
-    relationships_vdb: BaseVectorStorage,
+    hyperedges_vdb: BaseVectorStorage,
     text_chunks_db: BaseKVStorage[TextChunkSchema],
     query_param: QueryParam,
 ):
@@ -662,7 +689,7 @@ async def _build_query_context(
             ) = await _get_edge_data(
                 hl_keywrds,
                 knowledge_graph_inst,
-                relationships_vdb,
+                hyperedges_vdb,
                 text_chunks_db,
                 query_param,
             )
@@ -747,7 +774,7 @@ async def _get_node_data(
     )
 
     # build prompt
-    entites_section_list = [["id", "entity", "type", "description", "rank"]]
+    entites_section_list = [["id", "entity", "type", "description"]]
     for i, n in enumerate(node_datas):
         entites_section_list.append(
             [
@@ -755,24 +782,19 @@ async def _get_node_data(
                 n["entity_name"],
                 n.get("entity_type", "UNKNOWN"),
                 n.get("description", "UNKNOWN"),
-                n["rank"],
             ]
         )
     entities_context = list_of_list_to_csv(entites_section_list)
 
     relations_section_list = [
-        ["id", "source", "target", "description", "keywords", "weight", "rank"]
+        ["id", "hyperedge", "related_entities"]
     ]
     for i, e in enumerate(use_relations):
         relations_section_list.append(
             [
                 i,
-                e["src_tgt"][0],
-                e["src_tgt"][1],
                 e["description"],
-                e["keywords"],
-                e["weight"],
-                e["rank"],
+                e["related_nodes"]
             ]
         )
     relations_context = list_of_list_to_csv(relations_section_list)
@@ -871,7 +893,7 @@ async def _find_most_related_edges_from_entities(
 
     for this_edges in all_related_edges:
         for e in this_edges:
-            sorted_edge = tuple(sorted(e))
+            sorted_edge = tuple(e)
             if sorted_edge not in seen:
                 seen.add(sorted_edge)
                 all_edges.append(sorted_edge)
@@ -883,7 +905,7 @@ async def _find_most_related_edges_from_entities(
         *[knowledge_graph_inst.edge_degree(e[0], e[1]) for e in all_edges]
     )
     all_edges_data = [
-        {"src_tgt": k, "rank": d, **v}
+        {"src_tgt": k, "rank": d, "description": k[1], **v}
         for k, v, d in zip(all_edges, all_edges_pack, all_edges_degree)
         if v is not None
     ]
@@ -895,33 +917,43 @@ async def _find_most_related_edges_from_entities(
         key=lambda x: x["description"],
         max_token_size=query_param.max_token_for_global_context,
     )
+    all_related_nodes = await asyncio.gather(
+        *[knowledge_graph_inst.get_node_edges(edge["src_tgt"][1]) for edge in all_edges_data]
+    )
+    all_nodes = []
+    for this_nodes in all_related_nodes:
+        all_nodes.append("|".join([n[1] for n in this_nodes]))
+    all_edges_data = [
+        {**e, "related_nodes": n}
+        for e, n in zip(all_edges_data, all_nodes)
+    ]
     return all_edges_data
 
 
 async def _get_edge_data(
     keywords,
     knowledge_graph_inst: BaseGraphStorage,
-    relationships_vdb: BaseVectorStorage,
+    hyperedges_vdb: BaseVectorStorage,
     text_chunks_db: BaseKVStorage[TextChunkSchema],
     query_param: QueryParam,
 ):
-    results = await relationships_vdb.query(keywords, top_k=query_param.top_k)
+    results = await hyperedges_vdb.query(keywords, top_k=query_param.top_k)
 
     if not len(results):
         return "", "", ""
 
     edge_datas = await asyncio.gather(
-        *[knowledge_graph_inst.get_edge(r["src_id"], r["tgt_id"]) for r in results]
+        *[knowledge_graph_inst.get_node(r["hyperedge_name"]) for r in results]
     )
 
     if not all([n is not None for n in edge_datas]):
         logger.warning("Some edges are missing, maybe the storage is damaged")
-    edge_degree = await asyncio.gather(
-        *[knowledge_graph_inst.edge_degree(r["src_id"], r["tgt_id"]) for r in results]
-    )
+    # edge_degree = await asyncio.gather(
+    #     *[knowledge_graph_inst.node_degree(r["hyperedge_name"]) for r in results]
+    # )
     edge_datas = [
-        {"src_id": k["src_id"], "tgt_id": k["tgt_id"], "rank": d, **v}
-        for k, v, d in zip(results, edge_datas, edge_degree)
+        {"hyperedge": k["hyperedge_name"], "rank": k["distance"], **v}
+        for k, v in zip(results, edge_datas)
         if v is not None
     ]
     edge_datas = sorted(
@@ -929,9 +961,19 @@ async def _get_edge_data(
     )
     edge_datas = truncate_list_by_token_size(
         edge_datas,
-        key=lambda x: x["description"],
+        key=lambda x: x["hyperedge"],
         max_token_size=query_param.max_token_for_global_context,
     )
+    all_related_nodes = await asyncio.gather(
+        *[knowledge_graph_inst.get_node_edges(edge["hyperedge"]) for edge in edge_datas]
+    )
+    all_nodes = []
+    for this_nodes in all_related_nodes:
+        all_nodes.append("|".join([n[1] for n in this_nodes]))
+    edge_datas = [
+        {**e, "related_nodes": n}
+        for e, n in zip(edge_datas, all_nodes)
+    ]
 
     use_entities = await _find_most_related_entities_from_relationships(
         edge_datas, query_param, knowledge_graph_inst
@@ -944,31 +986,26 @@ async def _get_edge_data(
     )
 
     relations_section_list = [
-        ["id", "source", "target", "description", "keywords", "weight", "rank"]
+        ["id", "hyperedge", "related_entities"]
     ]
     for i, e in enumerate(edge_datas):
         relations_section_list.append(
             [
                 i,
-                e["src_id"],
-                e["tgt_id"],
-                e["description"],
-                e["keywords"],
-                e["weight"],
-                e["rank"],
+                e["hyperedge"],
+                e['related_nodes']
             ]
         )
     relations_context = list_of_list_to_csv(relations_section_list)
 
-    entites_section_list = [["id", "entity", "type", "description", "rank"]]
+    entites_section_list = [["id", "entity", "type", "description"]]
     for i, n in enumerate(use_entities):
         entites_section_list.append(
             [
                 i,
                 n["entity_name"],
                 n.get("entity_type", "UNKNOWN"),
-                n.get("description", "UNKNOWN"),
-                n["rank"],
+                n.get("description", "UNKNOWN")
             ]
         )
     entities_context = list_of_list_to_csv(entites_section_list)
@@ -985,16 +1022,19 @@ async def _find_most_related_entities_from_relationships(
     query_param: QueryParam,
     knowledge_graph_inst: BaseGraphStorage,
 ):
+    
+    node_datas = await asyncio.gather(
+        *[knowledge_graph_inst.get_node_edges(edge["hyperedge"]) for edge in edge_datas]
+    )
+    
     entity_names = []
     seen = set()
 
-    for e in edge_datas:
-        if e["src_id"] not in seen:
-            entity_names.append(e["src_id"])
-            seen.add(e["src_id"])
-        if e["tgt_id"] not in seen:
-            entity_names.append(e["tgt_id"])
-            seen.add(e["tgt_id"])
+    for node_data in node_datas:
+        for e in node_data:
+            if e[1] not in seen:
+                entity_names.append(e[1])
+                seen.add(e[1])
 
     node_datas = await asyncio.gather(
         *[knowledge_graph_inst.get_node(entity_name) for entity_name in entity_names]

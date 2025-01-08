@@ -2,6 +2,8 @@ import json
 from openai import OpenAI
 from transformers import GPT2Tokenizer
 import os
+import argparse
+import random
 os.environ["OPENAI_API_KEY"] = open("openai_api_key.txt").read().strip()
 
 def openai_complete_if_cache(
@@ -36,13 +38,17 @@ def get_summary(context, tot_tokens=2000):
 
     return summary
 
-
-clses = ["sample"]
+parser = argparse.ArgumentParser()
+parser.add_argument("--cls", type=str, default="hypertension")
+args = parser.parse_args()
+cls = args.cls
+clses = [cls]
 for cls in clses:
     with open(f"datasets/ultradoman/unique_contexts/{cls}_unique_contexts.json", mode="r") as f:
         unique_contexts = json.load(f)
 
     summaries = [get_summary(context) for context in unique_contexts]
+    summaries = random.sample(summaries, 10)
 
     total_description = "\n\n".join(summaries)
 

@@ -482,7 +482,7 @@ class HyperGraphRAG:
                 await self.entities_vdb.upsert(data_for_vdb)
 
             # Insert relationships into vector storage if needed
-            if self.relationships_vdb is not None:
+            if self.hyperedges_vdb is not None:
                 data_for_vdb = {
                     compute_mdhash_id(dp["src_id"] + dp["tgt_id"], prefix="rel-"): {
                         "src_id": dp["src_id"],
@@ -494,7 +494,7 @@ class HyperGraphRAG:
                     }
                     for dp in all_relationships_data
                 }
-                await self.relationships_vdb.upsert(data_for_vdb)
+                await self.hyperedges_vdb.upsert(data_for_vdb)
         finally:
             if update_storage:
                 await self._insert_done()
@@ -509,7 +509,7 @@ class HyperGraphRAG:
                 query,
                 self.chunk_entity_relation_graph,
                 self.entities_vdb,
-                self.relationships_vdb,
+                self.hyperedges_vdb,
                 self.text_chunks,
                 param,
                 asdict(self),
@@ -546,7 +546,7 @@ class HyperGraphRAG:
 
         try:
             await self.entities_vdb.delete_entity(entity_name)
-            await self.relationships_vdb.delete_relation(entity_name)
+            await self.hyperedges_vdb.delete_relation(entity_name)
             await self.chunk_entity_relation_graph.delete_node(entity_name)
 
             logger.info(
@@ -560,7 +560,7 @@ class HyperGraphRAG:
         tasks = []
         for storage_inst in [
             self.entities_vdb,
-            self.relationships_vdb,
+            self.hyperedges_vdb,
             self.chunk_entity_relation_graph,
         ]:
             if storage_inst is None:

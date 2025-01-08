@@ -46,6 +46,9 @@ def extract_unique_questions(input_directory, output_directory):
         unique_questions_list = []
         for query in list(unique_questions_dict.keys()):
             unique_questions_list.append({"query": query, "result": unique_questions_dict[query]})
+            
+        #取前20%
+        unique_questions_list = unique_questions_list[:int(len(unique_questions_list)*0.2)]
         
         print(
             f"There are {len(unique_questions_list)} unique `context` entries in the file {filename}."

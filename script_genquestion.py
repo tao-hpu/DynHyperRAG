@@ -48,7 +48,7 @@ for cls in clses:
         unique_contexts = json.load(f)
 
     summaries = [get_summary(context) for context in unique_contexts]
-    summaries = random.sample(summaries, 10)
+    summaries = random.sample(summaries, min(30,len(summaries)))
 
     total_description = "\n\n".join(summaries)
 

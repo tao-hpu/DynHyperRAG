@@ -13,15 +13,15 @@ pip install -r requirements.txt
 ### UltraDomain
 The ultradomain dataset used in HyperGraphRAG can be downloaded from [TommyChien/UltraDomain](https://huggingface.co/datasets/TommyChien/UltraDomain). to `datasets/ultradomain/agriculture[cs,legal,mix].json`.
 
-For UltraDomain dataset, we extract unique contexts from the dataset.
+For UltraDomain dataset, we extract unique contexts from the dataset to `datasets/ultradoman/unique_contexts/agriculture[cs,legal,mix]_unique_contexts.json`.
 ```bash
 python script_context.py
 ```
-For quantitative analysis, we collect questions and groundtruths from the dataset.
+For quantitative analysis, we collect questions and groundtruths from the dataset to `datasets/ultradoman/unique_questions/agriculture[cs,legal,mix]_unique_questions.json`.
 ```bash
 python script_question.py
 ```
-For qualitative analysis, we generate questions from the contexts.
+For qualitative analysis, we generate questions from the contexts to `datasets/ultradoman/questions/agriculture[cs,legal,mix]_questions.txt`.
 ```bash
 python script_genquestion.py --cls agriculture
 python script_genquestion.py --cls legal
@@ -32,18 +32,21 @@ python script_genquestion.py --cls mix
 ### Hypertension
 The hypertension dataset used in HyperGraphRAG can be downloaded from [2024 ESC Guidelines forthemanagement of elevated blood pressure andhypertension](https://academic.oup.com/eurheartj/article/45/38/3912/7741010?login=false) to `Hypertension.pdf`.
 
-For Hypertension dataset, we extract unique contexts from the PDF.
+For Hypertension dataset, we extract unique contexts from the PDF to `datasets/ultradoman/unique_contexts/hypertension_unique_contexts.json`.
 ```bash
 python script_pdf2txt.py
 ```
 For quantitative analysis, we collect questions and groundtruths from the real doctors, which can be downloaded from [here](https://academic.oup.com/eurheartj/article/45/38/3912/7741010?login=false) to `datasets/ultradoman/unique_questions/hypertension_unique_questions.json`.
 
-For qualitative analysis, we generate questions from the contexts.
-```bash
-python script_genquestion.py --cls hypertension
-```
+For qualitative analysis, we collect questions from the real doctors, which can be downloaded from [here](https://academic.oup.com/eurheartj/article/45/38/3912/7741010?login=false) to `datasets/ultradoman/questions/hypertension_questions.json`.
 
 ## HyperGraphRAG Process
+
+### Hypertension
+For the extracted contexts, we insert them into the HyperGraphRAG system.
+```bash
+nohup python script_insert.py --cls hypertension >> result_hypertension_insert.log 2>&1 &
+```
 
 ### Agriculture
 For the extracted contexts, we insert them into the HyperGraphRAG system.

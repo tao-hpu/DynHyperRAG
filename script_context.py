@@ -44,7 +44,7 @@ def extract_unique_contexts(input_directory, output_directory):
 
         unique_contexts_list = list(unique_contexts_dict.keys())
         #取前20%
-        unique_contexts_list = unique_contexts_list[:int(len(unique_contexts_list)*0.2)]
+        unique_contexts_list = unique_contexts_list[:int(len(unique_contexts_list)*0.2)+1]
         
         print(
             f"There are {len(unique_contexts_list)} unique `context` entries in the file {filename}."

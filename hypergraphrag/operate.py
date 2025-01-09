@@ -125,7 +125,7 @@ async def _handle_single_hyperrelation_extraction(
         float(record_attributes[-1]) if is_float_regex(record_attributes[-1]) else 1.0
     )
     return dict(
-        hyper_relation=knowledge_fragment,
+        hyper_relation="<hyperedge>"+knowledge_fragment,
         weight=weight,
         source_id=edge_source_id,
     )
@@ -557,7 +557,7 @@ async def kg_query(
                 record, [context_base["tuple_delimiter"]]
             )
             if len(record_attributes) == 3 and record_attributes[0] == '"hyper-relation"':
-                hl_keywords.append(clean_str(record_attributes[1]))
+                hl_keywords.append("<hyperedge>"+clean_str(record_attributes[1]))
             elif len(record_attributes) == 5 and record_attributes[0] == '"entity"':
                 ll_keywords.append(clean_str(record_attributes[1]).upper())
             else:

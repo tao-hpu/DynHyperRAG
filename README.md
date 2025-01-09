@@ -47,6 +47,12 @@ For the extracted contexts, we insert them into the HyperGraphRAG system.
 ```bash
 nohup python script_insert.py --cls hypertension >> result_hypertension_insert.log 2>&1 &
 ```
+#### Quantitative Evaluation
+#### Qualitative Evaluation 
+For the queries generated, we will extract them and query HyperGraphRAG.
+```bash
+nohup python script_qualquery.py --cls hypertension >> result_hypertension_qualquery.log 2>&1 &
+```
 
 ### Agriculture
 For the extracted contexts, we insert them into the HyperGraphRAG system.
@@ -76,6 +82,12 @@ nohup python script_qualquery.py --cls agriculture >> result_agriculture_qualque
 Evaluate HyperGraphRAG vs LightRAG
 ```bash
 nohup python script_qualeval.py --query_file datasets/ultradoman/questions/agriculture_questions.txt --result1_file output/ultradoman/agriculture/agriculture_result.json --result2_file others/lightrag/output/ultradoman/agriculture/agriculture_result.json --output_file_path output/ultradoman/agriculture --output_score_path output/ultradoman/agriculture >> result_agriculture_qualeval_hypergraphrag_vs_lightrag.log 2>&1 &
+```
+
+### CS
+For the extracted contexts, we insert them into the HyperGraphRAG system.
+```bash
+nohup python script_insert.py --cls cs >> result_cs_insert.log 2>&1 &
 ```
 
 

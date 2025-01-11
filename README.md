@@ -96,4 +96,10 @@ For the extracted contexts, we insert them into the HyperGraphRAG system.
 nohup python script_insert.py --cls legal >> result_legal_insert.log 2>&1 &
 ```
 
+### Mix
+For the extracted contexts, we insert them into the HyperGraphRAG system.
+```bash
+nohup python script_insert.py --cls mix >> result_mix_insert.log 2>&1 &
+```
+
 

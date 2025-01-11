@@ -57,9 +57,27 @@ Evaluate HyperGraphRAG vs LightRAG
 ```bash
 nohup python script_qualeval.py --query_file datasets/ultradoman/questions/hypertension_questions.txt --result1_file output_qual/ultradoman/hypertension/hypertension_result.json --result2_file others/LightRAG/output_qual/ultradoman/hypertension/hypertension_result.json --output_file_path output_qual/ultradoman/hypertension/batch_eval_HyperGraphRAG_vs_LightRAG.jsonl --output_score_path output_qual/ultradoman/hypertension/batch_eval_scores_HyperGraphRAG_vs_LightRAG.json >> result_hypertension_qualeval_HyperGraphRAG_vs_LightRAG.log 2>&1 &
 ```
+
+Evaluate HyperGraphRAG vs GraphRAG
 ```bash
-nohup python script_qualeval.py --query_file datasets/ultradoman/questions/hypertension_questions.txt --result2_file output_qual/ultradoman/hypertension/hypertension_result.json --result1_file others/LightRAG/output_qual/ultradoman/hypertension/hypertension_result.json --output_file_path output_qual/ultradoman/hypertension/batch_eval_LightRAG_vs_HyperGraphRAG.jsonl --output_score_path output_qual/ultradoman/hypertension/batch_eval_scores_LightRAG_vs_HyperGraphRAG.json >> result_hypertension_qualeval_LightRAG_vs_HyperGraphRAG.log 2>&1 &
+nohup python script_qualeval.py --query_file datasets/ultradoman/questions/hypertension_questions.txt --result1_file output_qual/ultradoman/hypertension/hypertension_result.json --result2_file others/GraphRAG/output_qual/ultradoman/hypertension/hypertension_result.json --output_file_path output_qual/ultradoman/hypertension/batch_eval_HyperGraphRAG_vs_GraphRAG.jsonl --output_score_path output_qual/ultradoman/hypertension/batch_eval_scores_HyperGraphRAG_vs_GraphRAG.json >> result_hypertension_qualeval_HyperGraphRAG_vs_GraphRAG.log 2>&1 &
 ```
+
+Evaluate HyperGraphRAG vs StandardRAG
+```bash
+nohup python script_qualeval.py --query_file datasets/ultradoman/questions/hypertension_questions.txt --result1_file output_qual/ultradoman/hypertension/hypertension_result.json --result2_file others/StandardRAG/output_qual/ultradoman/hypertension/hypertension_result.json --output_file_path output_qual/ultradoman/hypertension/batch_eval_HyperGraphRAG_vs_StandardRAG.jsonl --output_score_path output_qual/ultradoman/hypertension/batch_eval_scores_HyperGraphRAG_vs_StandardRAG.json >> result_hypertension_qualeval_HyperGraphRAG_vs_StandardRAG.log 2>&1 &
+```
+
+Evaluate HyperGraphRAG vs NaiveGeneration
+```bash
+nohup python script_qualeval.py --query_file datasets/ultradoman/questions/hypertension_questions.txt --result1_file output_qual/ultradoman/hypertension/hypertension_result.json --result2_file others/NaiveGeneration/output_qual/ultradoman/hypertension/hypertension_result.json --output_file_path output_qual/ultradoman/hypertension/batch_eval_HyperGraphRAG_vs_NaiveGeneration.jsonl --output_score_path output_qual/ultradoman/hypertension/batch_eval_scores_HyperGraphRAG_vs_NaiveGeneration.json >> result_hypertension_qualeval_HyperGraphRAG_vs_NaiveGeneration.log 2>&1 &
+```
+
+
+
+
+
+
 
 ### Agriculture
 For the extracted contexts, we insert them into the HyperGraphRAG system.

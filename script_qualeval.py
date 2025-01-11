@@ -171,6 +171,21 @@ def batch_eval(query_file, result1_file, result2_file, output_file_path, output_
 
     # 计算四种指标两个答案的得分, 
     answer_scores = {"Comprehensiveness": {"Answer1":0.0,"Answer2":0.0}, "Diversity": {"Answer1":0.0,"Answer2":0.0}, "Empowerment": {"Answer1":0.0,"Answer2":0.0}, "Overall Winner": {"Answer1":0.0,"Answer2":0.0}}
+
+    temp_results = []
+    for result in results:
+        try:
+            evaluation = result["Evaluation"]
+            for key in evaluation:
+                if evaluation[key]["Winner"] == "Answer 1":
+                    pass
+                elif evaluation[key]["Winner"] == "Answer 2":
+                    pass
+            temp_results.append(result)
+        except:
+            print(f"Error in question {i+1}")
+    results = temp_results
+
     for result in results:
         evaluation = result["Evaluation"]
         for key in evaluation:
@@ -186,10 +201,12 @@ def batch_eval(query_file, result1_file, result2_file, output_file_path, output_
     print(f"All evaluations completed and saved to {output_file_path}")
     
     # 将得分写入文件
-    with open(output_score_path, "w") as f:
-        json.dump(answer_scores, f, indent=2)
+    # with open(output_score_path, "w") as f:
+    #     json.dump(answer_scores, f, indent=2)
         
-    print(f"All scores saved to {output_score_path}")
+    # print(f"All scores saved to {output_score_path}")
+    
+    return answer_scores
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -199,4 +216,17 @@ if __name__ == "__main__":
     parser.add_argument("--output_file_path", type=str, default="output_qual/ultradoman/hypertension/batch_eval.jsonl")
     parser.add_argument("--output_score_path", type=str, default="output_qual/ultradoman/hypertension/batch_eval_scores.json")
     args = parser.parse_args()
-    batch_eval(args.query_file, args.result1_file, args.result2_file, args.output_file_path, args.output_score_path)
+    score1 = batch_eval(args.query_file, args.result1_file, args.result2_file, args.output_file_path, args.output_score_path)
+    score2 = batch_eval(args.query_file, args.result2_file, args.result1_file, args.output_file_path, args.output_score_path)
+    
+    answer_scores = {"Comprehensiveness": {"Answer1":0.0,"Answer2":0.0}, "Diversity": {"Answer1":0.0,"Answer2":0.0}, "Empowerment": {"Answer1":0.0,"Answer2":0.0}, "Overall Winner": {"Answer1":0.0,"Answer2":0.0}}
+    # 计算两个模型的得分
+    for key in answer_scores:
+        answer_scores[key]["Answer1"] = (score1[key]["Answer1"] + score2[key]["Answer2"])/2
+        answer_scores[key]["Answer2"] = (score1[key]["Answer2"] + score2[key]["Answer1"])/2
+    
+    # 将得分写入文件
+    with open(args.output_score_path, "w") as f:
+        json.dump(answer_scores, f, indent=2)
+        
+    print(f"All scores saved to {args.output_score_path}")

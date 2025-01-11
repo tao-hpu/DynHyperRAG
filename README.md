@@ -53,6 +53,13 @@ For the queries generated, we will extract them and query HyperGraphRAG.
 ```bash
 nohup python script_qualquery.py --cls hypertension >> result_hypertension_qualquery.log 2>&1 &
 ```
+Evaluate HyperGraphRAG vs LightRAG
+```bash
+nohup python script_qualeval.py --query_file datasets/ultradoman/questions/hypertension_questions.txt --result1_file output_qual/ultradoman/hypertension/hypertension_result.json --result2_file others/LightRAG/output_qual/ultradoman/hypertension/hypertension_result.json --output_file_path output_qual/ultradoman/hypertension/batch_eval_HyperGraphRAG_vs_LightRAG.jsonl --output_score_path output_qual/ultradoman/hypertension/batch_eval_scores_HyperGraphRAG_vs_LightRAG.json >> result_hypertension_qualeval_HyperGraphRAG_vs_LightRAG.log 2>&1 &
+```
+```bash
+nohup python script_qualeval.py --query_file datasets/ultradoman/questions/hypertension_questions.txt --result2_file output_qual/ultradoman/hypertension/hypertension_result.json --result1_file others/LightRAG/output_qual/ultradoman/hypertension/hypertension_result.json --output_file_path output_qual/ultradoman/hypertension/batch_eval_LightRAG_vs_HyperGraphRAG.jsonl --output_score_path output_qual/ultradoman/hypertension/batch_eval_scores_LightRAG_vs_HyperGraphRAG.json >> result_hypertension_qualeval_LightRAG_vs_HyperGraphRAG.log 2>&1 &
+```
 
 ### Agriculture
 For the extracted contexts, we insert them into the HyperGraphRAG system.

@@ -1,10 +1,10 @@
 import re
 import json
-import jsonlines
 import os
 os.environ["OPENAI_API_KEY"] = open("openai_api_key.txt").read().strip()
 from openai import OpenAI
 import argparse
+from tqdm import tqdm
 
 
 def batch_eval(query_file, result1_file, result2_file, output_file_path, output_score_path):
@@ -24,7 +24,7 @@ def batch_eval(query_file, result1_file, result2_file, output_file_path, output_
     answers2 = [i["result"] for i in answers2]
 
     results = []
-    for i, (query, answer1, answer2) in enumerate(zip(queries, answers1, answers2)):
+    for i, (query, answer1, answer2) in enumerate(tqdm(zip(queries, answers1, answers2))):
         sys_prompt = """
         ---Role---
         You are an expert tasked with evaluating two answers to the same question based on three criteria: **Comprehensiveness**, **Diversity**, and **Empowerment**.
@@ -163,8 +163,11 @@ def batch_eval(query_file, result1_file, result2_file, output_file_path, output_
         evaluation = response.choices[0].message.content
         print(f"Question {i+1} evaluation completed.\n")
         
-        # 保存结果
-        results.append({"Question": query, "Answer1": answer1, "Answer2": answer2, "Evaluation": json.loads(evaluation)})
+        try:
+            # 保存结果
+            results.append({"Question": query, "Answer1": answer1, "Answer2": answer2, "Evaluation": json.loads(evaluation)})
+        except:
+            print(f"Error in question {i+1}")
 
     # 计算四种指标两个答案的得分, 
     answer_scores = {"Comprehensiveness": {"Answer1":0.0,"Answer2":0.0}, "Diversity": {"Answer1":0.0,"Answer2":0.0}, "Empowerment": {"Answer1":0.0,"Answer2":0.0}, "Overall Winner": {"Answer1":0.0,"Answer2":0.0}}
@@ -190,10 +193,10 @@ def batch_eval(query_file, result1_file, result2_file, output_file_path, output_
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--query_file", type=str, default="datasets/ultradoman/questions/sample_questions.txt")
-    parser.add_argument("--result1_file", type=str, default="output_qual/ultradoman/sample/sample_result.json")
-    parser.add_argument("--result2_file", type=str, default="others/lightrag/output_qual/ultradoman/sample/sample_result.json")
-    parser.add_argument("--output_file_path", type=str, default="output_qual/ultradoman/sample/batch_eval.jsonl")
-    parser.add_argument("--output_score_path", type=str, default="output_qual/ultradoman/sample/batch_eval_scores.json")
+    parser.add_argument("--query_file", type=str, default="datasets/ultradoman/questions/hypertension_questions.txt")
+    parser.add_argument("--result1_file", type=str, default="output_qual/ultradoman/hypertension/hypertension_result.json")
+    parser.add_argument("--result2_file", type=str, default="others/LightRAG/output_qual/ultradoman/hypertension/hypertension_result.json")
+    parser.add_argument("--output_file_path", type=str, default="output_qual/ultradoman/hypertension/batch_eval.jsonl")
+    parser.add_argument("--output_score_path", type=str, default="output_qual/ultradoman/hypertension/batch_eval_scores.json")
     args = parser.parse_args()
     batch_eval(args.query_file, args.result1_file, args.result2_file, args.output_file_path, args.output_score_path)

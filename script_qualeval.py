@@ -27,17 +27,18 @@ def batch_eval(query_file, result1_file, result2_file, output_file_path, output_
     for i, (query, answer1, answer2) in enumerate(tqdm(zip(queries, answers1, answers2))):
         sys_prompt = """
         ---Role---
-        You are an expert tasked with evaluating two answers to the same question based on three criteria: **Comprehensiveness**, **Diversity**, and **Empowerment**.
+        You are an expert tasked with evaluating two answers to the same question based on four criteria: **Factuality**, **Comprehensiveness**, **Diversity**, and **Empowerment**.
         """
 
         prompt = f"""
-        You will evaluate two answers to the same question based on three criteria: **Comprehensiveness**, **Diversity**, and **Empowerment**.
+        You will evaluate two answers to the same question based on four criteria: **Factuality**, **Comprehensiveness**, **Diversity**, and **Empowerment**.
 
+        - **Factuality**: How accurate is the information provided in the answer, and does it align with verifiable facts and evidence?
         - **Comprehensiveness**: How much detail does the answer provide to cover all aspects and details of the question?
         - **Diversity**: How varied and rich is the answer in providing different perspectives and insights on the question?
         - **Empowerment**: How well does the answer help the reader understand and make informed judgments about the topic?
 
-        For each criterion, choose the better answer (either Answer 1 or Answer 2) and explain why. Then, select an overall winner based on these three categories.
+        For each criterion, choose the better answer (either Answer 1 or Answer 2) and explain why. Then, select an overall winner based on these four categories.
 
         Here is the question:
         {query}
@@ -50,11 +51,15 @@ def batch_eval(query_file, result1_file, result2_file, output_file_path, output_
         **Answer 2:**
         {answer2}
 
-        Evaluate both answers using the three criteria listed above and provide detailed explanations for each criterion.
+        Evaluate both answers using the four criteria listed above and provide detailed explanations for each criterion.
 
         Output your evaluation in the following JSON format:
 
         {{
+            "Factuality": {{
+                "Winner": "[Answer 1 or Answer 2]",
+                "Explanation": "[Provide explanation here]"
+            }},
             "Comprehensiveness": {{
                 "Winner": "[Answer 1 or Answer 2]",
                 "Explanation": "[Provide explanation here]"
@@ -69,7 +74,7 @@ def batch_eval(query_file, result1_file, result2_file, output_file_path, output_
             }},
             "Overall Winner": {{
                 "Winner": "[Answer 1 or Answer 2]",
-                "Explanation": "[Summarize why this answer is the overall winner based on the three criteria]"
+                "Explanation": "[Summarize why this answer is the overall winner based on the four criteria]"
             }}
         }}
         """
@@ -88,6 +93,22 @@ def batch_eval(query_file, result1_file, result2_file, output_file_path, output_
                     "schema": {
                         "type": "object",
                         "properties": {
+                            "Factuality": {
+                                "type": "object",
+                                "properties": {
+                                    "Winner": {
+                                        "type": "string",
+                                        "description": "The answer that is better in terms of factual accuracy (Answer 1 or Answer 2).",
+                                        "enum": ["Answer 1", "Answer 2"]
+                                    },
+                                    "Explanation": {
+                                        "type": "string",
+                                        "description": "A detailed explanation of why the chosen answer is better in terms of factual accuracy, including references to specific facts or evidence if applicable."
+                                    }
+                                },
+                                "required": ["Winner", "Explanation"],
+                                "additionalProperties": False
+                            },
                             "Comprehensiveness": {
                                 "type": "object",
                                 "properties": {
@@ -141,7 +162,7 @@ def batch_eval(query_file, result1_file, result2_file, output_file_path, output_
                                 "properties": {
                                     "Winner": {
                                         "type": "string",
-                                        "description": "The overall better answer based on all three criteria (Answer 1 or Answer 2).",
+                                        "description": "The overall better answer based on all four criteria (Answer 1 or Answer 2).",
                                         "enum": ["Answer 1", "Answer 2"]
                                     },
                                     "Explanation": {
@@ -153,7 +174,7 @@ def batch_eval(query_file, result1_file, result2_file, output_file_path, output_
                                 "additionalProperties": False
                             }
                         },
-                        "required": ["Comprehensiveness", "Diversity", "Empowerment", "Overall Winner"],
+                        "required": ["Factuality", "Comprehensiveness", "Diversity", "Empowerment", "Overall Winner"],
                         "additionalProperties": False
                     }
                 }
@@ -170,7 +191,7 @@ def batch_eval(query_file, result1_file, result2_file, output_file_path, output_
             print(f"Error in question {i+1}")
 
     # 计算四种指标两个答案的得分, 
-    answer_scores = {"Comprehensiveness": {"Answer1":0.0,"Answer2":0.0}, "Diversity": {"Answer1":0.0,"Answer2":0.0}, "Empowerment": {"Answer1":0.0,"Answer2":0.0}, "Overall Winner": {"Answer1":0.0,"Answer2":0.0}}
+    answer_scores = {"Factuality": {"Answer1":0.0,"Answer2":0.0}, "Comprehensiveness": {"Answer1":0.0,"Answer2":0.0}, "Diversity": {"Answer1":0.0,"Answer2":0.0}, "Empowerment": {"Answer1":0.0,"Answer2":0.0}, "Overall Winner": {"Answer1":0.0,"Answer2":0.0}}
 
     temp_results = []
     for result in results:
@@ -181,7 +202,8 @@ def batch_eval(query_file, result1_file, result2_file, output_file_path, output_
                     pass
                 elif evaluation[key]["Winner"] == "Answer 2":
                     pass
-            temp_results.append(result)
+            if "Factuality" in evaluation and "Comprehensiveness" in evaluation and "Diversity" in evaluation and "Empowerment" in evaluation and "Overall Winner" in evaluation:
+                temp_results.append(result)
         except:
             print(f"Error in question {i+1}")
     results = temp_results
@@ -219,7 +241,7 @@ if __name__ == "__main__":
     score1 = batch_eval(args.query_file, args.result1_file, args.result2_file, args.output_file_path, args.output_score_path)
     score2 = batch_eval(args.query_file, args.result2_file, args.result1_file, args.output_file_path, args.output_score_path)
     
-    answer_scores = {"Comprehensiveness": {"Answer1":0.0,"Answer2":0.0}, "Diversity": {"Answer1":0.0,"Answer2":0.0}, "Empowerment": {"Answer1":0.0,"Answer2":0.0}, "Overall Winner": {"Answer1":0.0,"Answer2":0.0}}
+    answer_scores = {"Factuality": {"Answer1":0.0,"Answer2":0.0}, "Comprehensiveness": {"Answer1":0.0,"Answer2":0.0}, "Diversity": {"Answer1":0.0,"Answer2":0.0}, "Empowerment": {"Answer1":0.0,"Answer2":0.0}, "Overall Winner": {"Answer1":0.0,"Answer2":0.0}}
     # 计算两个模型的得分
     for key in answer_scores:
         answer_scores[key]["Answer1"] = (score1[key]["Answer1"] + score2[key]["Answer2"])/2

@@ -247,6 +247,8 @@ if __name__ == "__main__":
         answer_scores[key]["Answer1"] = (score1[key]["Answer1"] + score2[key]["Answer2"])/2
         answer_scores[key]["Answer2"] = (score1[key]["Answer2"] + score2[key]["Answer1"])/2
     
+    print(answer_scores)
+    
     # 将得分写入文件
     with open(args.output_score_path, "w") as f:
         json.dump(answer_scores, f, indent=2)

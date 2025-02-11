@@ -24,14 +24,14 @@ def insert_text(rag, file_path):
         print("Insertion failed after exceeding the maximum number of retries")
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--cls", type=str, default="sample")
+parser.add_argument("--cls", type=str, default="hypertension")
 args = parser.parse_args()
 cls = args.cls
-WORKING_DIR = f"expr/ultradoman/{cls}"
+WORKING_DIR = f"expr/{cls}"
 
 if not os.path.exists(WORKING_DIR):
     os.makedirs(WORKING_DIR)
 
-rag = HyperGraphRAG(working_dir=WORKING_DIR,embedding_func_max_async=4,llm_model_max_async=4)
+rag = HyperGraphRAG(working_dir=WORKING_DIR,embedding_func_max_async=2,llm_model_max_async=2)
 
-insert_text(rag, f"datasets/ultradoman/unique_contexts/{cls}_unique_contexts.json")
+insert_text(rag, f"datasets/contexts/{cls}_contexts.json")

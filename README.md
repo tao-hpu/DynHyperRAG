@@ -10,121 +10,92 @@ pip install -r requirements.txt
 
 ## Dataset Preparation
 
-### UltraDomain
-The ultradomain dataset used in HyperGraphRAG can be downloaded from [TommyChien/UltraDomain](https://huggingface.co/datasets/TommyChien/UltraDomain). to `datasets/ultradomain/agriculture[cs,legal,mix].json`.
+We construct the GraphRAG evaluation based on [Hypertension](https://academic.oup.com/eurheartj/article/45/38/3912/7741010?login=false) and [UltraDomain](https://huggingface.co/datasets/TommyChien/UltraDomain) (Agriculture, Leagal, CS, Mix).
 
-For UltraDomain dataset, we extract unique contexts from the dataset to `datasets/ultradoman/unique_contexts/agriculture[cs,legal,mix]_unique_contexts.json`.
-```bash
-python script_context.py
 ```
-For quantitative analysis, we collect questions and groundtruths from the dataset to `datasets/ultradoman/unique_questions/agriculture[cs,legal,mix]_unique_questions.json`.
-```bash
-python script_question.py
+HyperGraphRAG/
+└── datasets/
+    ├── contexts/   
+        ├── hypertension_contexts.json   
+        ├── agriculture_contexts.json    
+        ├── cs_contexts.json                  
+        ├── legal_contexts.json                    
+        └── mix_contexts.json    
+    └── questions/           
+        ├── hypertension/                     
+            ├── hypertension_easy.json            
+            ├── hypertension_medium.json         
+            └── hypertension_hard.json     
+        ├── agriculture/                     
+            ├── agriculture_easy.json            
+            ├── agriculture_medium.json         
+            └── agriculture_hard.json 
+        ├── cs/                     
+            ├── cs_easy.json            
+            ├── cs_medium.json         
+            └── cs_hard.json 
+        ├── legal/                     
+            ├── legal_easy.json            
+            ├── legal_medium.json         
+            └── legal_hard.json 
+        └── mix/                     
+            ├── mix_easy.json            
+            ├── mix_medium.json         
+            └── mix_hard.json                                 
 ```
-For qualitative analysis, we generate questions from the contexts to `datasets/ultradoman/questions/agriculture[cs,legal,mix]_questions.txt`.
-```bash
-python script_genquestion.py --cls agriculture
-python script_genquestion.py --cls legal
-python script_genquestion.py --cls cs
-python script_genquestion.py --cls mix
-```
-
-### Hypertension
-The hypertension dataset used in HyperGraphRAG can be downloaded from [2024 ESC Guidelines forthemanagement of elevated blood pressure andhypertension](https://academic.oup.com/eurheartj/article/45/38/3912/7741010?login=false) to `Hypertension.pdf`.
-
-For Hypertension dataset, we extract unique contexts from the PDF to `datasets/ultradoman/unique_contexts/hypertension_unique_contexts.json`.
-```bash
-python script_pdf2txt.py
-```
-For quantitative analysis, we collect questions and groundtruths from the real doctors, which can be downloaded from [here](https://academic.oup.com/eurheartj/article/45/38/3912/7741010?login=false) to `datasets/ultradoman/unique_questions/hypertension_unique_questions.json`.
-
-For qualitative analysis, we collect questions from the real doctors, which can be downloaded from [here](https://academic.oup.com/eurheartj/article/45/38/3912/7741010?login=false) to `datasets/ultradoman/questions/hypertension_questions.json`.
 
 ## HyperGraphRAG Process
 
 ### Hypertension
+#### HyperGraph Construction
 For the extracted contexts, we insert them into the HyperGraphRAG system.
 ```bash
 nohup python script_insert.py --cls hypertension >> result_hypertension_insert.log 2>&1 &
 ```
-#### Quantitative Evaluation
-#### Qualitative Evaluation 
-For the queries generated, we will extract them and query HyperGraphRAG.
-```bash
-nohup python script_qualquery.py --cls hypertension >> result_hypertension_qualquery.log 2>&1 &
-```
-Evaluate HyperGraphRAG vs LightRAG
-```bash
-nohup python script_qualeval.py --query_file datasets/ultradoman/questions/hypertension_questions.txt --result1_file output_qual/ultradoman/hypertension/hypertension_result.json --result2_file others/LightRAG/output_qual/ultradoman/hypertension/hypertension_result.json --output_file_path output_qual/ultradoman/hypertension/batch_eval_HyperGraphRAG_vs_LightRAG.jsonl --output_score_path output_qual/ultradoman/hypertension/batch_eval_scores_HyperGraphRAG_vs_LightRAG.json >> result_hypertension_qualeval_HyperGraphRAG_vs_LightRAG.log 2>&1 &
-```
-
-Evaluate HyperGraphRAG vs GraphRAG
-```bash
-nohup python script_qualeval.py --query_file datasets/ultradoman/questions/hypertension_questions.txt --result1_file output_qual/ultradoman/hypertension/hypertension_result.json --result2_file others/GraphRAG/output_qual/ultradoman/hypertension/hypertension_result.json --output_file_path output_qual/ultradoman/hypertension/batch_eval_HyperGraphRAG_vs_GraphRAG.jsonl --output_score_path output_qual/ultradoman/hypertension/batch_eval_scores_HyperGraphRAG_vs_GraphRAG.json >> result_hypertension_qualeval_HyperGraphRAG_vs_GraphRAG.log 2>&1 &
-```
-
-Evaluate HyperGraphRAG vs StandardRAG
-```bash
-nohup python script_qualeval.py --query_file datasets/ultradoman/questions/hypertension_questions.txt --result1_file output_qual/ultradoman/hypertension/hypertension_result.json --result2_file others/StandardRAG/output_qual/ultradoman/hypertension/hypertension_result.json --output_file_path output_qual/ultradoman/hypertension/batch_eval_HyperGraphRAG_vs_StandardRAG.jsonl --output_score_path output_qual/ultradoman/hypertension/batch_eval_scores_HyperGraphRAG_vs_StandardRAG.json >> result_hypertension_qualeval_HyperGraphRAG_vs_StandardRAG.log 2>&1 &
-```
-
-Evaluate HyperGraphRAG vs NaiveGeneration
-```bash
-nohup python script_qualeval.py --query_file datasets/ultradoman/questions/hypertension_questions.txt --result1_file output_qual/ultradoman/hypertension/hypertension_result.json --result2_file others/NaiveGeneration/output_qual/ultradoman/hypertension/hypertension_result.json --output_file_path output_qual/ultradoman/hypertension/batch_eval_HyperGraphRAG_vs_NaiveGeneration.jsonl --output_score_path output_qual/ultradoman/hypertension/batch_eval_scores_HyperGraphRAG_vs_NaiveGeneration.json >> result_hypertension_qualeval_HyperGraphRAG_vs_NaiveGeneration.log 2>&1 &
-```
-
-
-
-
-
-
-
-### Agriculture
-For the extracted contexts, we insert them into the HyperGraphRAG system.
-```bash
-nohup python script_insert.py --cls agriculture >> result_agriculture_insert.log 2>&1 &
-```
-
-#### Quantitative Evaluation
+#### HyperGraph-Guided Generation
 For the queries collected, we will query HyperGraphRAG.
 ```bash
-nohup python script_quanquery.py --cls agriculture >> result_agriculture_quanquery.log 2>&1 &
+nohup python script_query.py --cls hypertension --level hard >> result_hypertension_hard_query.log 2>&1 &
+nohup python script_query.py --cls hypertension --level medium >> result_hypertension_medium_query.log 2>&1 &
+nohup python script_query.py --cls hypertension --level easy >> result_hypertension_easy_query.log 2>&1 &
 ```
-Evaluate HyperGraphRAG
+#### Evaluation
+Hard Evaluation:
 ```bash
-nohup python script_quaneval.py --groundtruth_file datasets/ultradoman/unique_questions/agriculture_unique_questions.json --predictions_file output_quan/ultradoman/agriculture/agriculture_result.json --output_score_path output_quan/ultradoman/agriculture/batch_eval_scores.json >> result_agriculture_quaneval_hypergraphrag.log 2>&1 &
+python script_eval.py --groundtruth_file datasets/questions/hypertension/hypertension_hard.json --predictions_file output/HyperGraphRAG/hypertension/hard/hypertension_hard_result.json --output_score_path output/HyperGraphRAG/hypertension/hard/batch_eval_scores.json
+python script_eval.py --groundtruth_file datasets/questions/hypertension/hypertension_hard.json --predictions_file output/LightRAG/hypertension/hard/hypertension_hard_result.json --output_score_path output/LightRAG/hypertension/hard/batch_eval_scores.json
+python script_eval.py --groundtruth_file datasets/questions/hypertension/hypertension_hard.json --predictions_file output/GraphRAG/hypertension/hard/hypertension_hard_result.json --output_score_path output/GraphRAG/hypertension/hard/batch_eval_scores.json
+python script_eval.py --groundtruth_file datasets/questions/hypertension/hypertension_hard.json --predictions_file output/StandardRAG/hypertension/hard/hypertension_hard_result.json --output_score_path output/StandardRAG/hypertension/hard/batch_eval_scores.json
+python script_eval.py --groundtruth_file datasets/questions/hypertension/hypertension_hard.json --predictions_file output/NaiveGeneration/hypertension/hard/hypertension_hard_result.json --output_score_path output/NaiveGeneration/hypertension/hard/batch_eval_scores.json
 ```
-Evaluate LightRAG
+Medium Evaluation:
 ```bash
-nohup python script_quaneval.py --groundtruth_file datasets/ultradoman/unique_questions/agriculture_unique_questions.json --predictions_file others/lightrag/output_quan/ultradoman/agriculture/agriculture_result.json --output_score_path output_quan/ultradoman/agriculture/batch_eval_scores_lightrag.json >> result_agriculture_quaneval_lightrag.log 2>&1 &
+python script_eval.py --groundtruth_file datasets/questions/hypertension/hypertension_medium.json --predictions_file output/HyperGraphRAG/hypertension/medium/hypertension_medium_result.json --output_score_path output/HyperGraphRAG/hypertension/medium/batch_eval_scores.json
+python script_eval.py --groundtruth_file datasets/questions/hypertension/hypertension_medium.json --predictions_file output/LightRAG/hypertension/medium/hypertension_medium_result.json --output_score_path output/LightRAG/hypertension/medium/batch_eval_scores.json
+python script_eval.py --groundtruth_file datasets/questions/hypertension/hypertension_medium.json --predictions_file output/GraphRAG/hypertension/medium/hypertension_medium_result.json --output_score_path output/GraphRAG/hypertension/medium/batch_eval_scores.json
+python script_eval.py --groundtruth_file datasets/questions/hypertension/hypertension_medium.json --predictions_file output/StandardRAG/hypertension/medium/hypertension_medium_result.json --output_score_path output/StandardRAG/hypertension/medium/batch_eval_scores.json
+python script_eval.py --groundtruth_file datasets/questions/hypertension/hypertension_medium.json --predictions_file output/NaiveGeneration/hypertension/medium/hypertension_medium_result.json --output_score_path output/NaiveGeneration/hypertension/medium/batch_eval_scores.json
+```
+Easy Evaluation:
+```bash
+python script_eval.py --groundtruth_file datasets/questions/hypertension/hypertension_easy.json --predictions_file output/HyperGraphRAG/hypertension/easy/hypertension_easy_result.json --output_score_path output/HyperGraphRAG/hypertension/easy/batch_eval_scores.json
+python script_eval.py --groundtruth_file datasets/questions/hypertension/hypertension_easy.json --predictions_file output/LightRAG/hypertension/easy/hypertension_easy_result.json --output_score_path output/LightRAG/hypertension/easy/batch_eval_scores.json
+python script_eval.py --groundtruth_file datasets/questions/hypertension/hypertension_easy.json --predictions_file output/GraphRAG/hypertension/easy/hypertension_easy_result.json --output_score_path output/GraphRAG/hypertension/easy/batch_eval_scores.json
+python script_eval.py --groundtruth_file datasets/questions/hypertension/hypertension_easy.json --predictions_file output/StandardRAG/hypertension/easy/hypertension_easy_result.json --output_score_path output/StandardRAG/hypertension/easy/batch_eval_scores.json
+python script_eval.py --groundtruth_file datasets/questions/hypertension/hypertension_easy.json --predictions_file output/NaiveGeneration/hypertension/easy/hypertension_easy_result.json --output_score_path output/NaiveGeneration/hypertension/easy/batch_eval_scores.json
 ```
 
-#### Qualitative Evaluation 
-For the queries generated, we will extract them and query HyperGraphRAG.
-```bash
-nohup python script_qualquery.py --cls agriculture >> result_agriculture_qualquery.log 2>&1 &
-```
-Evaluate HyperGraphRAG vs LightRAG
-```bash
-nohup python script_qualeval.py --query_file datasets/ultradoman/questions/agriculture_questions.txt --result1_file output/ultradoman/agriculture/agriculture_result.json --result2_file others/lightrag/output/ultradoman/agriculture/agriculture_result.json --output_file_path output/ultradoman/agriculture --output_score_path output/ultradoman/agriculture >> result_agriculture_qualeval_hypergraphrag_vs_lightrag.log 2>&1 &
-```
 
-### CS
-For the extracted contexts, we insert them into the HyperGraphRAG system.
-```bash
-nohup python script_insert.py --cls cs >> result_cs_insert.log 2>&1 &
-```
 
-### Legal
-For the extracted contexts, we insert them into the HyperGraphRAG system.
-```bash
-nohup python script_insert.py --cls legal >> result_legal_insert.log 2>&1 &
-```
 
-### Mix
-For the extracted contexts, we insert them into the HyperGraphRAG system.
-```bash
-nohup python script_insert.py --cls mix >> result_mix_insert.log 2>&1 &
-```
+
+
+
+
+
+
+
+
+
 
 

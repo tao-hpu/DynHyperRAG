@@ -65,22 +65,24 @@ def run_queries_and_save_to_json(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cls", type=str, default="sample")
+    parser.add_argument("--cls", type=str, default="hypertension")
+    parser.add_argument("--level", type=str, default="hard")
     args = parser.parse_args()
     cls = args.cls
+    level = args.level
     mode = "hybrid"
-    WORKING_DIR = f"expr/ultradoman/{cls}"
+    WORKING_DIR = f"expr/{cls}"
 
     rag = HyperGraphRAG(working_dir=WORKING_DIR)
     query_param = QueryParam(mode=mode)
 
-    with open(f"datasets/ultradoman/unique_questions/{cls}_unique_questions.json", "r") as f:
+    with open(f"datasets/questions/{cls}/{cls}_{level}.json", "r") as f:
         data = json.load(f)
     queries = [item["query"] for item in data]
     
-    if not os.path.exists(f"output_quan/ultradoman/{cls}"):
-        os.makedirs(f"output_quan/ultradoman/{cls}")    
+    if not os.path.exists(f"output/HyperGraphRAG/{cls}/{level}"):
+        os.makedirs(f"output/HyperGraphRAG/{cls}/{level}")
     
     run_queries_and_save_to_json(
-        queries, rag, query_param, f"output_quan/ultradoman/{cls}/{cls}_result.json", f"output_quan/ultradoman/{cls}/{cls}_errors.json"
+        queries, rag, query_param, f"output/HyperGraphRAG/{cls}/{level}/{cls}_{level}_result.json", f"output/HyperGraphRAG/{cls}/{level}/{cls}_{level}_errors.json"
     )

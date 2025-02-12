@@ -39,6 +39,11 @@ def run_queries_and_save_to_json(
     queries, rag_instance, query_param, output_file, error_file
 ):
     loop = always_get_an_event_loop()
+    
+    if os.path.exists(output_file):
+        os.remove(output_file)
+    if os.path.exists(error_file):
+        os.remove(error_file)
 
     with open(output_file, "a", encoding="utf-8") as result_file, open(
         error_file, "a", encoding="utf-8"

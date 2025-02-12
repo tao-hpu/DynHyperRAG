@@ -187,16 +187,41 @@ PROMPTS[
 
 PROMPTS["fail_response"] = "Sorry, I'm not able to provide an answer to that question."
 
+# PROMPTS["rag_response"] = """---Role---
+
+# You are a helpful assistant responding to questions about data in the tables provided.
+
+
+# ---Goal---
+
+# Generate a response of the target length and format that responds to the user's question, summarizing all information in the input data tables appropriate for the response length and format, and incorporating any relevant general knowledge.
+# If you don't know the answer, just say so. Do not make anything up.
+# Do not include information where the supporting evidence for it is not provided.
+
+# ---Target response length and format---
+
+# {response_type}
+
+# ---Data tables---
+
+# {context_data}
+
+# Add sections and commentary to the response as appropriate for the length and format. Style the response in markdown.
+# """
+
 PROMPTS["rag_response"] = """---Role---
 
-You are a helpful assistant responding to questions about data in the tables provided.
+You are an intelligent and precise AI assistant, answering questions based on structured data tables.
 
 
 ---Goal---
 
-Generate a response of the target length and format that responds to the user's question, summarizing all information in the input data tables appropriate for the response length and format, and incorporating any relevant general knowledge.
-If you don't know the answer, just say so. Do not make anything up.
-Do not include information where the supporting evidence for it is not provided.
+Generate a semantically accurate, factually correct, and highly relevant response that directly addresses the user’s question. The response should:
+	•	Maximize semantic alignment with expected answers, ensuring high similarity.
+	•	Ensure factual correctness, preserving key details, names, numbers, and relationships as in the data.
+	•	Stay fully relevant to the user’s query, avoiding unnecessary information while ensuring completeness.
+	•	Use structured formatting (headings, bullet points, tables) to enhance clarity and coherence.
+	•	Maintain a natural and precise writing style, improving readability.
 
 ---Target response length and format---
 
@@ -206,7 +231,12 @@ Do not include information where the supporting evidence for it is not provided.
 
 {context_data}
 
-Add sections and commentary to the response as appropriate for the length and format. Style the response in markdown.
+Response Guidelines
+	1.	Prioritize Key Details: Extract and summarize the most relevant information while maintaining completeness.
+	2.	Maintain Semantic Consistency: Ensure expressions are close to reference answers to improve similarity.
+	3.	Preserve Key Entities and Structure: Names, dates, numbers, and relationships must be correctly retained.
+	4.	Ensure Logical Flow: Structure the response in a way that enhances clarity and coherence.
+	5.	Keep It Concise and Relevant: Avoid redundant details and focus on answering the question directly.
 """
 
 PROMPTS["keywords_extraction"] = """---Role---

@@ -1,6 +1,7 @@
 import json
 from transformers import GPT2Tokenizer
 import argparse
+import os
 
 # 初始化 GPT-2 分词器
 tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
@@ -54,7 +55,14 @@ def compute_a_rel(groundtruth, predictions):
 
 # 主函数
 def evaluate_metrics(groundtruth_file, predictions_file, output_score_path):
-    groundtruth, predictions = load_data(groundtruth_file, predictions_file)
+    if "overall" in groundtruth_file:
+        groundtruth1, predictions1 = load_data(groundtruth_file.replace("overall","easy"), predictions_file.replace("overall","easy"))
+        groundtruth2, predictions2 = load_data(groundtruth_file.replace("overall","medium"), predictions_file.replace("overall","medium"))
+        groundtruth3, predictions3 = load_data(groundtruth_file.replace("overall","hard"), predictions_file.replace("overall","hard"))
+        groundtruth = groundtruth1 + groundtruth2 + groundtruth3
+        predictions = predictions1 + predictions2 + predictions3
+    else:
+        groundtruth, predictions = load_data(groundtruth_file, predictions_file)
 
     c_rec = compute_c_rec(groundtruth, predictions)
     c_erec = compute_c_erec(groundtruth, predictions, simple_entity_extractor)
@@ -70,6 +78,9 @@ def evaluate_metrics(groundtruth_file, predictions_file, output_score_path):
         "Context Entity Recall (C-ERec)": c_erec,
         "Answer Relevance (A-Rel)": a_rel
     }
+    if not os.path.exists(os.path.dirname(output_score_path)):
+        os.makedirs(os.path.dirname(output_score_path))
+    
     with open(output_score_path, "w") as f:
         json.dump(answer_scores, f, indent=2)
         
@@ -78,10 +89,14 @@ def evaluate_metrics(groundtruth_file, predictions_file, output_score_path):
     
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--groundtruth_file", type=str, default="datasets/ultradoman/unique_questions/sample_unique_questions.json")
-parser.add_argument("--predictions_file", type=str, default="output_quan/ultradoman/sample/sample_result.json")
-parser.add_argument("--output_score_path", type=str, default="output_quan/ultradoman/sample/batch_eval_scores.json")
+parser.add_argument("--cls", type=str, default="hypertension")
+parser.add_argument("--level", type=str, default="hard")
+parser.add_argument("--method", type=str, default="HyperGraphRAG")
 args = parser.parse_args()
 
+groundtruth_file=f"datasets/questions/{args.cls}/{args.cls}_{args.level}.json"
+predictions_file=f"output/{args.method}/{args.cls}/{args.level}/{args.cls}_{args.level}_result.json"
+output_score_path=f"output/{args.method}/{args.cls}/{args.level}/batch_eval_scores.json"
+
 # 调用评估函数
-evaluate_metrics(args.groundtruth_file, args.predictions_file, args.output_score_path)
+evaluate_metrics(groundtruth_file, predictions_file, output_score_path)

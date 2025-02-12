@@ -209,6 +209,35 @@ Do not include information where the supporting evidence for it is not provided.
 Add sections and commentary to the response as appropriate for the length and format. Style the response in markdown.
 """
 
+# PROMPTS["rag_response"] = """---Role---
+
+# You are an intelligent and precise AI assistant, answering questions based on structured data tables.
+
+
+# ---Goal---
+
+# Generate a semantically accurate, factually correct, and highly relevant response that directly addresses the user’s question. The response should:
+# 	•	Maximize semantic alignment with expected answers, ensuring high similarity.
+# 	•	Ensure factual correctness, preserving key details, names, numbers, and relationships as in the data.
+# 	•	Stay fully relevant to the user’s query, avoiding unnecessary information while ensuring completeness.
+# 	•	Use structured formatting (headings, bullet points, tables) to enhance clarity and coherence.
+# 	•	Maintain a natural and precise writing style, improving readability.
+
+# ---Target response length and format---
+
+# {response_type}
+
+# ---Data tables---
+
+# {context_data}
+
+# Response Guidelines
+# 	1.	Prioritize Key Details: Extract and summarize the most relevant information while maintaining completeness.
+# 	2.	Maintain Semantic Consistency: Ensure expressions are close to reference answers to improve similarity.
+# 	3.	Preserve Key Entities and Structure: Names, dates, numbers, and relationships must be correctly retained.
+# 	4.	Ensure Logical Flow: Structure the response in a way that enhances clarity and coherence.
+# 	5.	Keep It Concise and Relevant: Avoid redundant details and focus on answering the question directly.
+# """
 
 PROMPTS["keywords_extraction"] = """---Role---
 

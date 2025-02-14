@@ -46,6 +46,12 @@ HyperGraphRAG/
             └── mix_hard.json                                 
 ```
 
+
+python script_eval.py --cls hypertension --level easy --method HyperGraphRAG
+python script_eval.py --cls hypertension --level medium --method HyperGraphRAG
+python script_eval.py --cls hypertension --level hard --method HyperGraphRAG
+python script_eval.py --cls hypertension --level overall --method HyperGraphRAG
+
 ## HyperGraphRAG Process
 
 ### Hypertension

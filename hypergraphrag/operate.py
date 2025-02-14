@@ -571,12 +571,12 @@ async def kg_query(
     if hl_keywords == [] and ll_keywords == []:
         logger.warning("low_level_keywords and high_level_keywords is empty")
         return PROMPTS["fail_response"]
-    if ll_keywords == [] and query_param.mode in ["local", "hybrid"]:
+    if ll_keywords == [] and query_param.mode in ["hybrid"]:
         logger.warning("low_level_keywords is empty")
         return PROMPTS["fail_response"]
     else:
         ll_keywords = ", ".join(ll_keywords)
-    if hl_keywords == [] and query_param.mode in ["global", "hybrid"]:
+    if hl_keywords == [] and query_param.mode in ["hybrid"]:
         logger.warning("high_level_keywords is empty")
         return PROMPTS["fail_response"]
     else:
@@ -643,8 +643,6 @@ async def _build_query_context(
     text_chunks_db: BaseKVStorage[TextChunkSchema],
     query_param: QueryParam,
 ):
-    # ll_entities_context, ll_relations_context, ll_text_units_context = "", "", ""
-    # hl_entities_context, hl_relations_context, hl_text_units_context = "", "", ""
 
     ll_kewwords, hl_keywrds = query[0], query[1]
     if query_param.mode in ["local", "hybrid"]:
@@ -1124,94 +1122,3 @@ def combine_contexts(entities, relationships, sources):
     combined_sources = process_combine_contexts(hl_sources, ll_sources)
 
     return combined_entities, combined_relationships, combined_sources
-
-
-async def naive_query(
-    query,
-    chunks_vdb: BaseVectorStorage,
-    text_chunks_db: BaseKVStorage[TextChunkSchema],
-    query_param: QueryParam,
-    global_config: dict,
-    hashing_kv: BaseKVStorage = None,
-):
-    # Handle cache
-    use_model_func = global_config["llm_model_func"]
-    args_hash = compute_args_hash(query_param.mode, query)
-    cached_response, quantized, min_val, max_val = await handle_cache(
-        hashing_kv, args_hash, query, query_param.mode
-    )
-    if cached_response is not None:
-        return cached_response
-
-    results = await chunks_vdb.query(query, top_k=query_param.top_k)
-    if not len(results):
-        return PROMPTS["fail_response"]
-
-    chunks_ids = [r["id"] for r in results]
-    chunks = await text_chunks_db.get_by_ids(chunks_ids)
-
-    # Filter out invalid chunks
-    valid_chunks = [
-        chunk for chunk in chunks if chunk is not None and "content" in chunk
-    ]
-
-    if not valid_chunks:
-        logger.warning("No valid chunks found after filtering")
-        return PROMPTS["fail_response"]
-
-    maybe_trun_chunks = truncate_list_by_token_size(
-        valid_chunks,
-        key=lambda x: x["content"],
-        max_token_size=query_param.max_token_for_text_unit,
-    )
-
-    if not maybe_trun_chunks:
-        logger.warning("No chunks left after truncation")
-        return PROMPTS["fail_response"]
-
-    logger.info(f"Truncate {len(chunks)} to {len(maybe_trun_chunks)} chunks")
-    section = "\n--New Chunk--\n".join([c["content"] for c in maybe_trun_chunks])
-
-    if query_param.only_need_context:
-        return section
-
-    sys_prompt_temp = PROMPTS["naive_rag_response"]
-    sys_prompt = sys_prompt_temp.format(
-        content_data=section, response_type=query_param.response_type
-    )
-
-    if query_param.only_need_prompt:
-        return sys_prompt
-
-    response = await use_model_func(
-        query,
-        system_prompt=sys_prompt,
-    )
-
-    if len(response) > len(sys_prompt):
-        response = (
-            response[len(sys_prompt) :]
-            .replace(sys_prompt, "")
-            .replace("user", "")
-            .replace("model", "")
-            .replace(query, "")
-            .replace("<system>", "")
-            .replace("</system>", "")
-            .strip()
-        )
-
-    # Save to cache
-    await save_to_cache(
-        hashing_kv,
-        CacheData(
-            args_hash=args_hash,
-            content=response,
-            prompt=query,
-            quantized=quantized,
-            min_val=min_val,
-            max_val=max_val,
-            mode=query_param.mode,
-        ),
-    )
-
-    return response

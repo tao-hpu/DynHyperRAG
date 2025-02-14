@@ -75,11 +75,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     cls = args.cls
     level = args.level
-    mode = "hybrid"
     WORKING_DIR = f"expr/{cls}"
 
     rag = HyperGraphRAG(working_dir=WORKING_DIR)
-    query_param = QueryParam(mode=mode)
+    query_param = QueryParam(mode="hybrid")
 
     with open(f"datasets/questions/{cls}/{cls}_{level}.json", "r") as f:
         data = json.load(f)

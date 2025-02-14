@@ -14,8 +14,7 @@ from .operate import (
     chunking_by_token_size,
     extract_entities,
     # local_query,global_query,hybrid_query,
-    kg_query,
-    naive_query,
+    kg_query
 )
 
 from .utils import (
@@ -179,8 +178,6 @@ class HyperGraphRAG:
         _print_config = ",\n  ".join([f"{k} = {v}" for k, v in asdict(self).items()])
         logger.debug(f"HyperGraphRAG init with param:\n  {_print_config}\n")
 
-        # @TODO: should move all storage setup here to leverage initial start params attached to self.
-
         self.key_string_value_json_storage_cls: Type[BaseKVStorage] = (
             self._get_storage_class()[self.kv_storage]
         )
@@ -208,9 +205,6 @@ class HyperGraphRAG:
             self.embedding_func
         )
 
-        ####
-        # add embedding func by walter
-        ####
         self.full_docs = self.key_string_value_json_storage_cls(
             namespace="full_docs",
             global_config=asdict(self),
@@ -226,9 +220,6 @@ class HyperGraphRAG:
             global_config=asdict(self),
             embedding_func=self.embedding_func,
         )
-        ####
-        # add embedding func by walter over
-        ####
 
         self.entities_vdb = self.vector_db_storage_cls(
             namespace="entities",
@@ -504,7 +495,7 @@ class HyperGraphRAG:
         return loop.run_until_complete(self.aquery(query, param))
 
     async def aquery(self, query: str, param: QueryParam = QueryParam()):
-        if param.mode in ["local", "global", "hybrid"]:
+        if param.mode in ["hybrid"]:
             response = await kg_query(
                 query,
                 self.chunk_entity_relation_graph,
@@ -515,17 +506,6 @@ class HyperGraphRAG:
                 asdict(self),
                 hashing_kv=self.llm_response_cache,
             )
-        elif param.mode == "naive":
-            response = await naive_query(
-                query,
-                self.chunks_vdb,
-                self.text_chunks,
-                param,
-                asdict(self),
-                hashing_kv=self.llm_response_cache,
-            )
-        else:
-            raise ValueError(f"Unknown mode {param.mode}")
         await self._query_done()
         return response
 

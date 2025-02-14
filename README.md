@@ -46,12 +46,6 @@ HyperGraphRAG/
             └── mix_hard.json                                 
 ```
 
-
-python script_eval.py --cls hypertension --level easy --method HyperGraphRAG
-python script_eval.py --cls hypertension --level medium --method HyperGraphRAG
-python script_eval.py --cls hypertension --level hard --method HyperGraphRAG
-python script_eval.py --cls hypertension --level overall --method HyperGraphRAG
-
 ## HyperGraphRAG Process
 
 ### Hypertension
@@ -68,36 +62,11 @@ nohup python script_query.py --cls hypertension --level medium >> result_hyperte
 nohup python script_query.py --cls hypertension --level hard >> result_hypertension_hard_query.log 2>&1 &
 ```
 #### Evaluation
-Random Source Evaluation:
+Three kinds of Source and Overall Evaluation:
 ```bash
-python script_eval.py --cls hypertension --level easy --method NaiveGeneration
-python script_eval.py --cls hypertension --level easy --method StandardRAG
-python script_eval.py --cls hypertension --level easy --method GraphRAG
-python script_eval.py --cls hypertension --level easy --method LightRAG
 python script_eval.py --cls hypertension --level easy --method HyperGraphRAG
-```
-Single-Entity Source Evaluation:
-```bash
-python script_eval.py --cls hypertension --level medium --method NaiveGeneration
-python script_eval.py --cls hypertension --level medium --method StandardRAG
-python script_eval.py --cls hypertension --level medium --method GraphRAG
-python script_eval.py --cls hypertension --level medium --method LightRAG
 python script_eval.py --cls hypertension --level medium --method HyperGraphRAG
-```
-Multi-Entity Source Evaluation:
-```bash
-python script_eval.py --cls hypertension --level hard --method NaiveGeneration
-python script_eval.py --cls hypertension --level hard --method StandardRAG
-python script_eval.py --cls hypertension --level hard --method GraphRAG
-python script_eval.py --cls hypertension --level hard --method LightRAG
 python script_eval.py --cls hypertension --level hard --method HyperGraphRAG
-```
-Overall Evaluation:
-```bash
-python script_eval.py --cls hypertension --level overall --method NaiveGeneration
-python script_eval.py --cls hypertension --level overall --method StandardRAG
-python script_eval.py --cls hypertension --level overall --method GraphRAG
-python script_eval.py --cls hypertension --level overall --method LightRAG
 python script_eval.py --cls hypertension --level overall --method HyperGraphRAG
 ```
 
@@ -115,36 +84,11 @@ nohup python script_query.py --cls agriculture --level medium >> result_agricult
 nohup python script_query.py --cls agriculture --level hard >> result_agriculture_hard_query.log 2>&1 &
 ```
 #### Evaluation
-Random Source Evaluation:
+Three kinds of Source and Overall Evaluation:
 ```bash
-python script_eval.py --cls agriculture --level easy --method NaiveGeneration
-python script_eval.py --cls agriculture --level easy --method StandardRAG
-python script_eval.py --cls agriculture --level easy --method GraphRAG
-python script_eval.py --cls agriculture --level easy --method LightRAG
 python script_eval.py --cls agriculture --level easy --method HyperGraphRAG
-```
-Single-Entity Source Evaluation:
-```bash
-python script_eval.py --cls agriculture --level medium --method NaiveGeneration
-python script_eval.py --cls agriculture --level medium --method StandardRAG
-python script_eval.py --cls agriculture --level medium --method GraphRAG
-python script_eval.py --cls agriculture --level medium --method LightRAG
 python script_eval.py --cls agriculture --level medium --method HyperGraphRAG
-```
-Multi-Entity Source Evaluation:
-```bash
-python script_eval.py --cls agriculture --level hard --method NaiveGeneration
-python script_eval.py --cls agriculture --level hard --method StandardRAG
-python script_eval.py --cls agriculture --level hard --method GraphRAG
-python script_eval.py --cls agriculture --level hard --method LightRAG
 python script_eval.py --cls agriculture --level hard --method HyperGraphRAG
-```
-Overall Evaluation:
-```bash
-python script_eval.py --cls agriculture --level overall --method NaiveGeneration
-python script_eval.py --cls agriculture --level overall --method StandardRAG
-python script_eval.py --cls agriculture --level overall --method GraphRAG
-python script_eval.py --cls agriculture --level overall --method LightRAG
 python script_eval.py --cls agriculture --level overall --method HyperGraphRAG
 ```
 
@@ -162,36 +106,11 @@ nohup python script_query.py --cls cs --level medium >> result_cs_medium_query.l
 nohup python script_query.py --cls cs --level hard >> result_cs_hard_query.log 2>&1 &
 ```
 #### Evaluation
-Random Source Evaluation:
+Three kinds of Source and Overall Evaluation:
 ```bash
-python script_eval.py --cls cs --level easy --method NaiveGeneration
-python script_eval.py --cls cs --level easy --method StandardRAG
-python script_eval.py --cls cs --level easy --method GraphRAG
-python script_eval.py --cls cs --level easy --method LightRAG
 python script_eval.py --cls cs --level easy --method HyperGraphRAG
-```
-Single-Entity Source Evaluation:
-```bash
-python script_eval.py --cls cs --level medium --method NaiveGeneration
-python script_eval.py --cls cs --level medium --method StandardRAG
-python script_eval.py --cls cs --level medium --method GraphRAG
-python script_eval.py --cls cs --level medium --method LightRAG
 python script_eval.py --cls cs --level medium --method HyperGraphRAG
-```
-Multi-Entity Source Evaluation:
-```bash
-python script_eval.py --cls cs --level hard --method NaiveGeneration
-python script_eval.py --cls cs --level hard --method StandardRAG
-python script_eval.py --cls cs --level hard --method GraphRAG
-python script_eval.py --cls cs --level hard --method LightRAG
 python script_eval.py --cls cs --level hard --method HyperGraphRAG
-```
-Overall Evaluation:
-```bash
-python script_eval.py --cls cs --level overall --method NaiveGeneration
-python script_eval.py --cls cs --level overall --method StandardRAG
-python script_eval.py --cls cs --level overall --method GraphRAG
-python script_eval.py --cls cs --level overall --method LightRAG
 python script_eval.py --cls cs --level overall --method HyperGraphRAG
 ```
 
@@ -209,36 +128,11 @@ nohup python script_query.py --cls legal --level medium >> result_legal_medium_q
 nohup python script_query.py --cls legal --level hard >> result_legal_hard_query.log 2>&1 &
 ```
 #### Evaluation
-Random Source Evaluation:
+Three kinds of Source and Overall Evaluation:
 ```bash
-python script_eval.py --cls legal --level easy --method NaiveGeneration
-python script_eval.py --cls legal --level easy --method StandardRAG
-python script_eval.py --cls legal --level easy --method GraphRAG
-python script_eval.py --cls legal --level easy --method LightRAG
 python script_eval.py --cls legal --level easy --method HyperGraphRAG
-```
-Single-Entity Source Evaluation:
-```bash
-python script_eval.py --cls legal --level medium --method NaiveGeneration
-python script_eval.py --cls legal --level medium --method StandardRAG
-python script_eval.py --cls legal --level medium --method GraphRAG
-python script_eval.py --cls legal --level medium --method LightRAG
 python script_eval.py --cls legal --level medium --method HyperGraphRAG
-```
-Multi-Entity Source Evaluation:
-```bash
-python script_eval.py --cls legal --level hard --method NaiveGeneration
-python script_eval.py --cls legal --level hard --method StandardRAG
-python script_eval.py --cls legal --level hard --method GraphRAG
-python script_eval.py --cls legal --level hard --method LightRAG
 python script_eval.py --cls legal --level hard --method HyperGraphRAG
-```
-Overall Evaluation:
-```bash
-python script_eval.py --cls legal --level overall --method NaiveGeneration
-python script_eval.py --cls legal --level overall --method StandardRAG
-python script_eval.py --cls legal --level overall --method GraphRAG
-python script_eval.py --cls legal --level overall --method LightRAG
 python script_eval.py --cls legal --level overall --method HyperGraphRAG
 ```
 
@@ -257,36 +151,11 @@ nohup python script_query.py --cls mix --level medium >> result_mix_medium_query
 nohup python script_query.py --cls mix --level hard >> result_mix_hard_query.log 2>&1 &
 ```
 #### Evaluation
-Random Source Evaluation:
+Three kinds of Source and Overall Evaluation:
 ```bash
-python script_eval.py --cls mix --level easy --method NaiveGeneration
-python script_eval.py --cls mix --level easy --method StandardRAG
-python script_eval.py --cls mix --level easy --method GraphRAG
-python script_eval.py --cls mix --level easy --method LightRAG
 python script_eval.py --cls mix --level easy --method HyperGraphRAG
-```
-Single-Entity Source Evaluation:
-```bash
-python script_eval.py --cls mix --level medium --method NaiveGeneration
-python script_eval.py --cls mix --level medium --method StandardRAG
-python script_eval.py --cls mix --level medium --method GraphRAG
-python script_eval.py --cls mix --level medium --method LightRAG
 python script_eval.py --cls mix --level medium --method HyperGraphRAG
-```
-Multi-Entity Source Evaluation:
-```bash
-python script_eval.py --cls mix --level hard --method NaiveGeneration
-python script_eval.py --cls mix --level hard --method StandardRAG
-python script_eval.py --cls mix --level hard --method GraphRAG
-python script_eval.py --cls mix --level hard --method LightRAG
 python script_eval.py --cls mix --level hard --method HyperGraphRAG
-```
-Overall Evaluation:
-```bash
-python script_eval.py --cls mix --level overall --method NaiveGeneration
-python script_eval.py --cls mix --level overall --method StandardRAG
-python script_eval.py --cls mix --level overall --method GraphRAG
-python script_eval.py --cls mix --level overall --method LightRAG
 python script_eval.py --cls mix --level overall --method HyperGraphRAG
 ```
 

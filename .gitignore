@@ -182,3 +182,4 @@ openai_api_key.txt
 examples/*
 *.pdf
 others/*
+plot/*

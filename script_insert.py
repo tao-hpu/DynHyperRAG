@@ -3,13 +3,9 @@ import json
 import time
 from hypergraphrag import HyperGraphRAG
 import argparse
-
 os.environ["OPENAI_API_KEY"] = open("openai_api_key.txt").read().strip()
 
-def insert_text(rag, file_path):
-    with open(file_path, mode="r") as f:
-        unique_contexts = json.load(f)
-
+def insert_knowledge(rag, unique_contexts):
     retries = 0
     max_retries = 10
     while retries < max_retries:
@@ -26,12 +22,13 @@ def insert_text(rag, file_path):
 parser = argparse.ArgumentParser()
 parser.add_argument("--cls", type=str, default="hypertension")
 args = parser.parse_args()
-cls = args.cls
-WORKING_DIR = f"expr/{cls}"
 
-if not os.path.exists(WORKING_DIR):
-    os.makedirs(WORKING_DIR)
+rag = HyperGraphRAG(working_dir=f"expr/{args.cls}")
 
-rag = HyperGraphRAG(working_dir=WORKING_DIR,embedding_func_max_async=2,llm_model_max_async=2)
+with open(f"datasets/contexts/{args.cls}_contexts.json", mode="r") as f:
+    unique_contexts = json.load(f)
+    
+insert_knowledge(rag, unique_contexts)
 
-insert_text(rag, f"datasets/contexts/{cls}_contexts.json")
+
+

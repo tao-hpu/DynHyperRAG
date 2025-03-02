@@ -7,6 +7,7 @@ conda activate hypergraphrag
 pip install torch==2.3.0
 pip install -r requirements.txt
 ```
+You need add ``openai_api_key.txt`` in the root directory, which contains the OpenAI API key.
 
 ## Dataset Preparation
 

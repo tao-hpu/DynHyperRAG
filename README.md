@@ -14,7 +14,7 @@ pip install -r requirements.txt
 ```
 
 ## Quick Start
-### HyperGraph Construction
+### Knowledge HyperGraph Construction
 ```python
 import os
 import json
@@ -29,7 +29,7 @@ with open(f"example_contexts.json", mode="r") as f:
 rag.insert(unique_contexts)
 ```
 
-### HyperGraph Query
+### Knowledge HyperGraph Query
 ```python
 import os
 from hypergraphrag import HyperGraphRAG

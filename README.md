@@ -1,5 +1,11 @@
 # HyperGraphRAG
 
+Official resources of **"HyperGraphRAG: Retrieval-Augmented Generation with Hypergraph-Structured Knowledge Representation"**. Haoran Luo, Haihong E, Guanting Chen, Yandan Zheng, Xiaobao Wu, Yikai Guo, Qika Lin, Yu Feng, Zemin Kuang, Meina Song, Yifan Zhu, Luu Anh Tuan.
+
+##  Overview 
+
+![](./figs/F1.png)
+
 ## Dependence
 ```bash
 conda create -n hypergraphrag python=3.11
@@ -36,3 +42,7 @@ query_text = 'How strong is the evidence supporting a systolic BP target of 120â
 result = rag.query(query_text)
 print(result)
 ```
+
+## Acknowledgement
+
+This repo benefits from [LightRAG](https://github.com/HKUDS/LightRAG), [Text2NKG](https://github.com/LHRLAB/Text2NKG), and [HAHE](https://github.com/LHRLAB/HAHE).  Thanks for their wonderful works.

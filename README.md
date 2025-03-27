@@ -6,7 +6,7 @@ Official resources of **"HyperGraphRAG: Retrieval-Augmented Generation with Hype
 
 ![](./figs/F1.png)
 
-## Dependence
+## Environment Setup
 ```bash
 conda create -n hypergraphrag python=3.11
 conda activate hypergraphrag

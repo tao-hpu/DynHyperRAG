@@ -1,6 +1,6 @@
 # HyperGraphRAG
 
-HyperGraphRAG: Retrieval-Augmented Generation with Hypergraph-Structured Knowledge Representation [paper](https://arxiv.org/abs/2503.21322)
+HyperGraphRAG: Retrieval-Augmented Generation with Hypergraph-Structured Knowledge Representation [[paper](https://arxiv.org/abs/2503.21322)]
 
 ##  Overview 
 

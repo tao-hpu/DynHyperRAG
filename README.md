@@ -43,6 +43,24 @@ result = rag.query(query_text)
 print(result)
 ```
 
+## BibTex
+
+If you find this work is helpful for your research, please cite:
+
+```bibtex
+@misc{luo2025hypergraphrag,
+      title={HyperGraphRAG: Retrieval-Augmented Generation with Hypergraph-Structured Knowledge Representation}, 
+      author={Haoran Luo and Haihong E and Guanting Chen and Yandan Zheng and Xiaobao Wu and Yikai Guo and Qika Lin and Yu Feng and Zemin Kuang and Meina Song and Yifan Zhu and Luu Anh Tuan},
+      year={2025},
+      eprint={2503.21322},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2503.21322}, 
+}
+```
+
+For further questions, please contact: luohaoran@bupt.edu.cn.
+
 ## Acknowledgement
 
 This repo benefits from [LightRAG](https://github.com/HKUDS/LightRAG), [Text2NKG](https://github.com/LHRLAB/Text2NKG), and [HAHE](https://github.com/LHRLAB/HAHE).  Thanks for their wonderful works.

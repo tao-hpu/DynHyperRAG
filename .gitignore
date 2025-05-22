@@ -183,3 +183,6 @@ examples/*
 *.pdf
 others/*
 plot/*
+evaluation/contexts/*
+evaluation/datasets/*
+evaluation/expr/*

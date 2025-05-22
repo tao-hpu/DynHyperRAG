@@ -1,6 +1,6 @@
 # HyperGraphRAG
 
-HyperGraphRAG: Retrieval-Augmented Generation with Hypergraph-Structured Knowledge Representation [[paper](https://arxiv.org/abs/2503.21322)]
+HyperGraphRAG: Retrieval-Augmented Generation via Hypergraph-Structured Knowledge Representation [[paper](https://arxiv.org/abs/2503.21322)]
 
 ##  Overview 
 
@@ -42,6 +42,8 @@ query_text = 'How strong is the evidence supporting a systolic BP target of 120â
 result = rag.query(query_text)
 print(result)
 ```
+
+> For evaluation, please refer to the [evaluation](./evaluation/README.md) folder.
 
 ## BibTex
 

@@ -7,7 +7,7 @@ cd evaluation
 ```
 Then, we need to set openai api key in ```openai_api_key.txt``` file. (We use [www.apiyi.com](https://www.apiyi.com/) for LLM server.)
 
-Last, we need download the contexts and datasets and put them in the ```contexts``` and ```datasets``` folders. 
+Last, we need download the contexts and datasets from [Terabox](https://1024terabox.com/s/1TK3e6FI96LZb17DIJGdK3Q) and put them in the ```contexts``` and ```datasets``` folders. 
 
 ```
 HyperGraphRAG/

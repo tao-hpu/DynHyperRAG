@@ -1,6 +1,6 @@
 # HyperGraphRAG
 
-HyperGraphRAG: Retrieval-Augmented Generation via Hypergraph-Structured Knowledge Representation [[paper](https://arxiv.org/abs/2503.21322)]
+Official resources of **"HyperGraphRAG: Retrieval-Augmented Generation via Hypergraph-Structured Knowledge Representation"**. Haoran Luo, Haihong E, Guanting Chen, Yandan Zheng, Xiaobao Wu, Yikai Guo, Qika Lin, Yu Feng, Zemin Kuang, Meina Song, Yifan Zhu, Luu Anh Tuan. **NeurIPS 2025** \[[paper](https://arxiv.org/abs/2503.21322)\].
 
 ##  Overview 
 

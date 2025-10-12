@@ -24,11 +24,11 @@ Haoran Luo, Haihong E, Guanting Chen, et al. **NeurIPS 2025**
    - Proper handling of `EmbeddingFunc` with `functools.partial`
    - Improved error handling and retry mechanisms
 
-3. **📚 Comprehensive Chinese Documentation**
-   - [快速启动指南](docs/QUICKSTART.md) - Get started in 5 minutes
-   - [详细配置指南](docs/SETUP.md) - Complete setup instructions
-   - [运行分析报告](docs/运行分析报告.md) - Performance analysis & HyperGraphRAG advantages
-   - [安装问题解决](docs/安装问题解决.md) - Troubleshooting guide
+3. **📚 Comprehensive Documentation**
+   - [Quick Start Guide](docs/QUICKSTART.md) - Get started in 5 minutes (中文)
+   - [Setup Guide](docs/SETUP.md) - Complete setup instructions (中文)
+   - [Performance Analysis](docs/performance-analysis.md) - HyperGraphRAG advantages & benchmarks
+   - [Troubleshooting Guide](docs/troubleshooting.md) - Common issues & solutions
 
 4. **💡 Enhanced Example Scripts**
    - Improved `script_construct.py` with progress indicators
@@ -63,7 +63,7 @@ HyperGraphRAG represents a significant advancement in RAG systems by using **hyp
 - HyperGraphRAG: One hyperedge connects **N entities** (n-ary relation)
 - Better models real-world complex relationships (medical, legal, scientific domains)
 
-📊 Detailed analysis: [运行分析报告.md](docs/运行分析报告.md)
+📊 Detailed analysis: [Performance Analysis Report](docs/performance-analysis.md)
 
 ---
 
@@ -139,10 +139,11 @@ HyperGraphRAG/
 ├── script_query.py          # Enhanced query script
 ├── hypergraphrag/           # Core library
 ├── docs/                    # Comprehensive documentation
-│   ├── QUICKSTART.md        # 5-minute quick start (中文)
-│   ├── SETUP.md             # Detailed setup guide (中文)
-│   ├── 运行分析报告.md       # Performance & advantage analysis
-│   └── 安装问题解决.md       # Troubleshooting guide
+│   ├── QUICKSTART.md        # Quick start guide (中文)
+│   ├── SETUP.md             # Setup guide (中文)
+│   ├── performance-analysis.md  # Performance & advantage analysis
+│   ├── troubleshooting.md   # Troubleshooting guide
+│   └── architecture.md      # Architecture & design
 └── evaluation/              # Evaluation scripts
 ```
 
@@ -186,7 +187,7 @@ Tested on 3-document medical dataset:
 - **Query time**: ~3 seconds (hybrid mode)
 - **API success rate**: >95%
 
-Full analysis: [docs/运行分析报告.md](docs/运行分析报告.md)
+Full analysis: [docs/performance-analysis.md](docs/performance-analysis.md)
 
 ---
 
@@ -247,17 +248,27 @@ For questions about the original implementation: Contact the original authors at
 
 ## 🙏 Acknowledgements
 
-### Original Work
-This fork is based on the excellent work by the LHRLAB team. Please see the [original repository](https://github.com/LHRLAB/HyperGraphRAG).
+### Original Authors
+This fork is based on the excellent work by **Haoran Luo**, **Haihong E**, and the LHRLAB team. Their groundbreaking research on hypergraph-structured knowledge representation (NeurIPS 2025) laid the foundation for this enhanced implementation.
+
+**Special thanks to**:
+- [Haoran Luo](mailto:haoran.luo@ieee.org) and the research team for their innovative HyperGraphRAG paper
+- [LHRLAB](https://github.com/LHRLAB) for the original implementation and continuous maintenance
+- The open-source community for valuable feedback and contributions
+
+### Related Research
+This fork also benefits from related work:
+- [CHDA](https://github.com/slanorgcn/CHDA) - Clinical Hypergraph Data Analysis framework
+- [cognitive-workspace](https://github.com/tao-hpu/cognitive-workspace) - Active memory management for LLMs
 
 ### Dependencies
-This project benefits from:
+This project builds upon excellent open-source projects:
 - [LightRAG](https://github.com/HKUDS/LightRAG) - RAG framework foundation
 - [Text2NKG](https://github.com/LHRLAB/Text2NKG) - Knowledge graph extraction
 - [HAHE](https://github.com/LHRLAB/HAHE) - Hypergraph algorithms
 
 ### Development Tools
-- [Claude Code](https://claude.com/claude-code) - Assisted in documentation and bug fixes
+- [Claude Code](https://claude.com/claude-code) - Assisted in documentation, bug fixes, and analysis
 
 ---
 
@@ -269,10 +280,18 @@ This fork maintains the same license as the original repository. Please refer to
 
 ## 🔗 Links
 
+### Original Work
 - **Original Repository**: [LHRLAB/HyperGraphRAG](https://github.com/LHRLAB/HyperGraphRAG)
-- **Paper**: [arXiv:2503.21322](https://arxiv.org/abs/2503.21322)
+- **NeurIPS 2025 Paper**: [arXiv:2503.21322](https://arxiv.org/abs/2503.21322)
+- **Original Author**: [Haoran Luo](mailto:haoran.luo@ieee.org)
+
+### This Fork
+- **Fork Repository**: [tao-hpu/HyperGraphRAG](https://github.com/tao-hpu/HyperGraphRAG)
 - **Maintainer Homepage**: [tao-hpu.github.io](https://tao-hpu.github.io)
-- **Related Projects**: [cognitive-workspace](https://github.com/tao-hpu/cognitive-workspace) - Active memory management for LLMs
+
+### Related Projects
+- [cognitive-workspace](https://github.com/tao-hpu/cognitive-workspace) - Active memory management for LLMs
+- [CHDA](https://github.com/slanorgcn/CHDA) - Clinical Hypergraph Data Analysis
 
 ---
 

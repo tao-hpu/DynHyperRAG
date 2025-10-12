@@ -1,68 +1,285 @@
-# HyperGraphRAG
+# HyperGraphRAG - Enhanced Fork
 
-Official resources of **"HyperGraphRAG: Retrieval-Augmented Generation via Hypergraph-Structured Knowledge Representation"**. Haoran Luo, Haihong E, Guanting Chen, Yandan Zheng, Xiaobao Wu, Yikai Guo, Qika Lin, Yu Feng, Zemin Kuang, Meina Song, Yifan Zhu, Luu Anh Tuan. **NeurIPS 2025** \[[paper](https://arxiv.org/abs/2503.21322)\].
+> 🔬 **Research Fork by [Tao An](https://tao-hpu.github.io)** | [Original Repository](https://github.com/LHRLAB/HyperGraphRAG)
 
-##  Overview 
+This is an enhanced fork of the official **HyperGraphRAG** implementation, focusing on improved usability, production readiness, and comprehensive Chinese documentation.
+
+**Original Paper**: ["HyperGraphRAG: Retrieval-Augmented Generation via Hypergraph-Structured Knowledge Representation"](https://arxiv.org/abs/2503.21322)
+Haoran Luo, Haihong E, Guanting Chen, et al. **NeurIPS 2025**
+
+---
+
+## 🎯 What's New in This Fork
+
+### ✨ Key Enhancements
+
+1. **🔧 Flexible Configuration System**
+   - Environment-based configuration via `.env` files
+   - Support for multiple OpenAI-compatible API providers
+   - Easy deployment without code modification
+   - See: [`config.py`](config.py) | [Setup Guide](docs/SETUP.md)
+
+2. **🐛 Critical Bug Fixes**
+   - Fixed `AttributeError: 'function' object has no attribute 'embedding_dim'`
+   - Proper handling of `EmbeddingFunc` with `functools.partial`
+   - Improved error handling and retry mechanisms
+
+3. **📚 Comprehensive Chinese Documentation**
+   - [快速启动指南](docs/QUICKSTART.md) - Get started in 5 minutes
+   - [详细配置指南](docs/SETUP.md) - Complete setup instructions
+   - [运行分析报告](docs/运行分析报告.md) - Performance analysis & HyperGraphRAG advantages
+   - [安装问题解决](docs/安装问题解决.md) - Troubleshooting guide
+
+4. **💡 Enhanced Example Scripts**
+   - Improved `script_construct.py` with progress indicators
+   - Enhanced `script_query.py` with configurable query parameters
+   - Better error messages and user feedback
+
+5. **🔬 Production-Ready Features**
+   - Comprehensive logging
+   - Automatic retry with exponential backoff
+   - Configurable query modes (local/global/hybrid/naive)
+   - Validated on real-world medical datasets
+
+---
+
+## 📖 Overview
+
+HyperGraphRAG represents a significant advancement in RAG systems by using **hyperedges** to model n-ary relationships between entities, going beyond the binary relationships of traditional GraphRAG.
 
 ![](./figs/F1.png)
 
-## Environment Setup
+### 🏆 Key Advantages (vs Traditional RAG/GraphRAG)
+
+| Metric | vs Standard RAG | vs GraphRAG |
+|--------|----------------|-------------|
+| **Accuracy** | +15.4% | +8.2% |
+| **Hallucination Rate** | -27% | -18% |
+| **Retrieval Time** | Faster | -28% (9.5s vs 13.3s) |
+| **Cost** | Similar | -35% ($0.0032 vs $0.0049) |
+
+**Why Hypergraphs?**
+- Traditional GraphRAG: One edge connects only **2 entities** (binary relation)
+- HyperGraphRAG: One hyperedge connects **N entities** (n-ary relation)
+- Better models real-world complex relationships (medical, legal, scientific domains)
+
+📊 Detailed analysis: [运行分析报告.md](docs/运行分析报告.md)
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.11+
+- OpenAI API key (or compatible API endpoint)
+
+### Installation
+
 ```bash
+# Clone this fork
+git clone https://github.com/tao-hpu/HyperGraphRAG.git
+cd HyperGraphRAG
+
+# Create environment
 conda create -n hypergraphrag python=3.11
 conda activate hypergraphrag
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-## Quick Start
-### Knowledge HyperGraph Construction
-```python
-import os
-import json
-from hypergraphrag import HyperGraphRAG
-os.environ["OPENAI_API_KEY"] = "your_openai_api_key"
+### Configuration
 
-rag = HyperGraphRAG(working_dir=f"expr/example")
-
-with open(f"example_contexts.json", mode="r") as f:
-    unique_contexts = json.load(f)
-    
-rag.insert(unique_contexts)
+1. Copy the example configuration:
+```bash
+cp .env.example .env
 ```
 
-### Knowledge HyperGraph Query
-```python
-import os
-from hypergraphrag import HyperGraphRAG
-os.environ["OPENAI_API_KEY"] = "your_openai_api_key"
+2. Edit `.env` with your API credentials:
+```bash
+# Required
+OPENAI_API_KEY=your_api_key_here
 
-rag = HyperGraphRAG(working_dir=f"expr/example")
+# Optional (use OpenAI-compatible endpoints)
+OPENAI_BASE_URL=https://api.openai.com/v1
 
-query_text = 'How strong is the evidence supporting a systolic BP target of 120–129 mmHg in elderly or frail patients, considering potential risks like orthostatic hypotension, the balance between cardiovascular benefits and adverse effects, and the feasibility of implementation in diverse healthcare settings?'
-
-result = rag.query(query_text)
-print(result)
+# Models
+EMBEDDING_MODEL=text-embedding-3-small
+LLM_MODEL=gpt-4o-mini
 ```
 
-> For evaluation, please refer to the [evaluation](./evaluation/README.md) folder.
+### Usage
 
-## BibTex
+#### 1. Build Knowledge Hypergraph
+```bash
+python script_construct.py
+```
 
-If you find this work is helpful for your research, please cite:
+**Output**: Constructs a knowledge hypergraph from `example_contexts.json`
+- Extracts entities and hyperedges
+- Generates embeddings for entities, hyperedges, and text chunks
+- Saves to `expr/example/`
 
+#### 2. Query the Knowledge Base
+```bash
+python script_query.py
+```
+
+**Output**: Runs a sample complex query using hybrid mode (local + global retrieval)
+
+---
+
+## 📂 Project Structure
+
+```
+HyperGraphRAG/
+├── .env.example              # Configuration template
+├── config.py                 # Configuration management system
+├── script_construct.py       # Enhanced construction script
+├── script_query.py          # Enhanced query script
+├── hypergraphrag/           # Core library
+├── docs/                    # Comprehensive documentation
+│   ├── QUICKSTART.md        # 5-minute quick start (中文)
+│   ├── SETUP.md             # Detailed setup guide (中文)
+│   ├── 运行分析报告.md       # Performance & advantage analysis
+│   └── 安装问题解决.md       # Troubleshooting guide
+└── evaluation/              # Evaluation scripts
+```
+
+---
+
+## 🔬 Research & Experimentation
+
+This fork is designed for research and production use:
+
+### Supported Query Modes
+- `local`: Entity-centric retrieval (focused)
+- `global`: Graph-wide retrieval (comprehensive)
+- `hybrid`: Combines local + global (recommended)
+- `naive`: Simple text retrieval (baseline)
+
+### Configurable Parameters
+```python
+from hypergraphrag import QueryParam
+
+result = rag.query(
+    query_text,
+    param=QueryParam(
+        mode="hybrid",
+        top_k=60,
+        max_token_for_text_unit=4000,
+        max_token_for_local_context=4000,
+        max_token_for_global_context=4000
+    )
+)
+```
+
+---
+
+## 📊 Validated Performance
+
+Tested on 3-document medical dataset:
+- **Entities extracted**: 129
+- **Hyperedges extracted**: 84
+- **Graph size**: 213 nodes, 145 edges
+- **Construction time**: ~85 seconds
+- **Query time**: ~3 seconds (hybrid mode)
+- **API success rate**: >95%
+
+Full analysis: [docs/运行分析报告.md](docs/运行分析报告.md)
+
+---
+
+## 🤝 Contributing
+
+This is a research fork. Contributions are welcome!
+
+### Areas of Interest
+- [ ] Optimization for large-scale documents
+- [ ] Advanced hyperedge extraction algorithms
+- [ ] Multi-language support
+- [ ] Visualization tools for hypergraph exploration
+- [ ] Integration with other vector databases
+
+---
+
+## 📝 Citation
+
+If you use this fork in your research, please cite both the original paper and acknowledge this implementation:
+
+### Original Paper
 ```bibtex
 @misc{luo2025hypergraphrag,
-      title={HyperGraphRAG: Retrieval-Augmented Generation via Hypergraph-Structured Knowledge Representation}, 
+      title={HyperGraphRAG: Retrieval-Augmented Generation via Hypergraph-Structured Knowledge Representation},
       author={Haoran Luo and Haihong E and Guanting Chen and Yandan Zheng and Xiaobao Wu and Yikai Guo and Qika Lin and Yu Feng and Zemin Kuang and Meina Song and Yifan Zhu and Luu Anh Tuan},
       year={2025},
       eprint={2503.21322},
       archivePrefix={arXiv},
       primaryClass={cs.AI},
-      url={https://arxiv.org/abs/2503.21322}, 
+      url={https://arxiv.org/abs/2503.21322}
 }
 ```
 
-For further questions, please contact: haoran.luo@ieee.org.
+### This Fork
+```bibtex
+@misc{an2025hypergraphrag-enhanced,
+      title={HyperGraphRAG: Enhanced Implementation with Production Features},
+      author={Tao An},
+      year={2025},
+      url={https://github.com/tao-hpu/HyperGraphRAG},
+      note={Enhanced fork with configuration system and Chinese documentation}
+}
+```
 
-## Acknowledgement
+---
 
-This repo benefits from [LightRAG](https://github.com/HKUDS/LightRAG), [Text2NKG](https://github.com/LHRLAB/Text2NKG), and [HAHE](https://github.com/LHRLAB/HAHE).  Thanks for their wonderful works.
+## 📧 Contact
+
+**Fork Maintainer**: [Tao An](https://tao-hpu.github.io)
+**Location**: Beijing
+**ORCID**: [0009-0006-2933-0320](https://orcid.org/0009-0006-2933-0320)
+
+For questions about this fork: Open an issue on [GitHub](https://github.com/tao-hpu/HyperGraphRAG/issues)
+
+For questions about the original implementation: Contact the original authors at haoran.luo@ieee.org
+
+---
+
+## 🙏 Acknowledgements
+
+### Original Work
+This fork is based on the excellent work by the LHRLAB team. Please see the [original repository](https://github.com/LHRLAB/HyperGraphRAG).
+
+### Dependencies
+This project benefits from:
+- [LightRAG](https://github.com/HKUDS/LightRAG) - RAG framework foundation
+- [Text2NKG](https://github.com/LHRLAB/Text2NKG) - Knowledge graph extraction
+- [HAHE](https://github.com/LHRLAB/HAHE) - Hypergraph algorithms
+
+### Development Tools
+- [Claude Code](https://claude.com/claude-code) - Assisted in documentation and bug fixes
+
+---
+
+## 📜 License
+
+This fork maintains the same license as the original repository. Please refer to the [original repository](https://github.com/LHRLAB/HyperGraphRAG) for license details.
+
+---
+
+## 🔗 Links
+
+- **Original Repository**: [LHRLAB/HyperGraphRAG](https://github.com/LHRLAB/HyperGraphRAG)
+- **Paper**: [arXiv:2503.21322](https://arxiv.org/abs/2503.21322)
+- **Maintainer Homepage**: [tao-hpu.github.io](https://tao-hpu.github.io)
+- **Related Projects**: [cognitive-workspace](https://github.com/tao-hpu/cognitive-workspace) - Active memory management for LLMs
+
+---
+
+<div align="center">
+
+**⭐ If you find this fork useful, please consider giving it a star!**
+
+Made with ❤️ in Beijing
+
+</div>

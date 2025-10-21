@@ -187,3 +187,11 @@ evaluation/contexts/*
 evaluation/datasets/*
 evaluation/expr/*
 evaluation/results/*
+
+# Kiro IDE
+.kiro/
+
+# API
+api/__pycache__/
+api/**/__pycache__/
+*.pyc

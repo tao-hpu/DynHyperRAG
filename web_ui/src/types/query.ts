@@ -13,6 +13,7 @@ export interface QueryPath {
   nodes: string[];
   edges: string[];
   scores: Record<string, number>;
+  nodeTypes?: Record<string, 'local' | 'global' | 'both'>; // Track which mode retrieved each node
 }
 
 export interface QueryResponse {

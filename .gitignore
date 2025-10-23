@@ -195,3 +195,15 @@ evaluation/results/*
 api/__pycache__/
 api/**/__pycache__/
 *.pyc
+
+# Docker
+.env.docker
+docker-compose.override.yml
+
+# Logs
+logs/*.log
+logs/**/*.log
+!logs/.gitkeep
+
+# Backups
+backup-*.tar.gz

@@ -1,0 +1,41 @@
+version: '3.8'
+
+# Development Docker Compose configuration
+# Usage: docker-compose -f docker-compose.dev.yml up
+
+services:
+  # Backend API Service (Development)
+  backend:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: hypergraphrag-api-dev
+    ports:
+      - "3401:3401"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-text-embedding-3-small}
+      - WORKING_DIR=/data/hypergraphrag
+      - LOG_LEVEL=DEBUG
+      - PYTHONUNBUFFERED=1
+      - CORS_ORIGINS=http://localhost:3400,http://localhost:80
+    volumes:
+      # Mount source code for hot reload
+      - ./api:/app/api:ro
+      - ./hypergraphrag:/app/hypergraphrag:ro
+      - ./config.py:/app/config.py:ro
+      - ./expr/example:/data/hypergraphrag:ro
+      - ./logs:/app/logs
+    command: ["python", "-m", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "3401", "--reload"]
+    networks:
+      - hypergraphrag-network
+    restart: unless-stopped
+
+  # Frontend is typically run locally in dev mode
+  # Use: cd web_ui && pnpm dev
+
+networks:
+  hypergraphrag-network:
+    driver: bridge

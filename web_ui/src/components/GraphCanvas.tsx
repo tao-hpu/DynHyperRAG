@@ -1,24 +1,63 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import cytoscape from 'cytoscape';
 // @ts-ignore - cytoscape-cose-bilkent 没有类型定义
 import coseBilkent from 'cytoscape-cose-bilkent';
 import type { Core, NodeSingular, EdgeSingular } from 'cytoscape';
 import type { GraphData, Node, Edge } from '@/types/graph';
+import type { QueryPath } from '@/types/query';
+import type { VisualizationSettings } from '@/types/settings';
+import { exportToPNG, exportToSVG, exportToJSON } from '@/utils/exportUtils';
+import type { ExportOptions } from '@/components/ExportPanel';
 
 // 注册 cose-bilkent 布局插件
 cytoscape.use(coseBilkent);
 
 interface GraphCanvasProps {
   data: GraphData;
+  settings?: VisualizationSettings; // Visualization settings
   onNodeClick?: (node: Node) => void;
   onEdgeClick?: (edge: Edge) => void;
   onNodeDoubleClick?: (nodeId: string) => void;
   focusNodeId?: string | null;
+  queryPath?: QueryPath | null;
+  animationStep?: number | null; // Current animation step (null = show all)
+  showLocalPath?: boolean; // Show local retrieval path (for hybrid mode)
+  showGlobalPath?: boolean; // Show global retrieval path (for hybrid mode)
+  queryMode?: string; // Current query mode
+  importedLayout?: Record<string, { x: number; y: number }> | null; // Imported layout positions
 }
 
-const GraphCanvas = ({ data, onNodeClick, onEdgeClick, onNodeDoubleClick, focusNodeId }: GraphCanvasProps) => {
+// 导出的方法接口
+export interface GraphCanvasRef {
+  exportPNG: (options?: ExportOptions) => void;
+  exportSVG: (options?: ExportOptions) => void;
+  exportJSON: (options?: ExportOptions) => void;
+  getCytoscapeInstance: () => Core | null;
+}
+
+const GraphCanvas = forwardRef<GraphCanvasRef, GraphCanvasProps>(({ data, settings, onNodeClick, onEdgeClick, onNodeDoubleClick, focusNodeId, queryPath, animationStep, showLocalPath = true, showGlobalPath = true, queryMode, importedLayout }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<Core | null>(null);
+
+  // 暴露导出方法给父组件
+  useImperativeHandle(ref, () => ({
+    exportPNG: (options?: ExportOptions) => {
+      if (cyRef.current) {
+        exportToPNG(cyRef.current, options);
+      }
+    },
+    exportSVG: (options?: ExportOptions) => {
+      if (cyRef.current) {
+        exportToSVG(cyRef.current, options);
+      }
+    },
+    exportJSON: (options?: ExportOptions) => {
+      if (cyRef.current) {
+        exportToJSON(cyRef.current, data, options);
+      }
+    },
+    getCytoscapeInstance: () => cyRef.current,
+  }));
 
   // 计算凸包（Convex Hull）- Graham Scan 算法
   const computeConvexHull = (points: { x: number; y: number }[]) => {
@@ -184,6 +223,91 @@ const GraphCanvas = ({ data, onNodeClick, onEdgeClick, onNodeDoubleClick, focusN
             'overlay-color': '#f59e0b',
           }
         },
+        // 查询路径高亮样式 - 低相关性节点
+        {
+          selector: 'node.query-path-low',
+          style: {
+            'background-color': '#fef3c7',
+            'border-color': '#fbbf24',
+            'border-width': 3,
+            'opacity': 0.7,
+            'z-index': 998,
+          }
+        },
+        // 查询路径高亮样式 - 中等相关性节点
+        {
+          selector: 'node.query-path-medium',
+          style: {
+            'background-color': '#fbbf24',
+            'border-color': '#f59e0b',
+            'border-width': 4,
+            'opacity': 0.85,
+            'z-index': 999,
+          }
+        },
+        // 查询路径高亮样式 - 高相关性节点
+        {
+          selector: 'node.query-path-high',
+          style: {
+            'background-color': '#f59e0b',
+            'border-color': '#ea580c',
+            'border-width': 5,
+            'opacity': 1,
+            'z-index': 1000,
+          }
+        },
+        // Local 查询模式节点 (蓝色系)
+        {
+          selector: 'node.query-mode-local',
+          style: {
+            'background-color': '#60a5fa',
+            'border-color': '#3b82f6',
+            'border-width': 4,
+            'z-index': 999,
+          }
+        },
+        // Global 查询模式节点 (紫色系)
+        {
+          selector: 'node.query-mode-global',
+          style: {
+            'background-color': '#a78bfa',
+            'border-color': '#8b5cf6',
+            'border-width': 4,
+            'z-index': 999,
+          }
+        },
+        // Both 查询模式节点 (绿色系 - 表示两种模式都检索到)
+        {
+          selector: 'node.query-mode-both',
+          style: {
+            'background-color': '#34d399',
+            'border-color': '#10b981',
+            'border-width': 5,
+            'z-index': 1000,
+          }
+        },
+        // 查询路径边高亮
+        {
+          selector: 'edge.query-path',
+          style: {
+            'width': 4,
+            'line-color': '#fbbf24',
+            'target-arrow-color': '#fbbf24',
+            'opacity': 0.9,
+            'z-index': 999,
+          }
+        },
+        // 查询路径边高亮 - 高权重
+        {
+          selector: 'edge.query-path-high',
+          style: {
+            'width': 5,
+            'line-color': '#f59e0b',
+            'target-arrow-color': '#f59e0b',
+            'opacity': 1,
+            'z-index': 1000,
+          }
+        },
       ],
 
       // 初始布局（后续会应用力导向布局）
@@ -194,6 +318,11 @@ const GraphCanvas = ({ data, onNodeClick, onEdgeClick, onNodeDoubleClick, focusN
       // 交互配置
       minZoom: 0.1,
       maxZoom: 10,
+      wheelSensitivity: 0.2,
+
+      // 移动端手势支持
+      touchTapThreshold: 8,
+      desktopTapThreshold: 4,
 
       // 性能优化
       hideEdgesOnViewport: true,
@@ -319,11 +448,41 @@ const GraphCanvas = ({ data, onNodeClick, onEdgeClick, onNodeDoubleClick, focusN
     cy.on('viewport', renderHyperedgeHulls);
 
     // 窗口大小变化时重新调整
-    window.addEventListener('resize', resizeOverlay);
+    let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
+    const handleResize = () => {
+      // 防抖处理，避免频繁触发
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
+
+      resizeTimeout = setTimeout(() => {
+        resizeOverlay();
+
+        // 调整 Cytoscape 画布大小
+        if (cy && !cy.destroyed()) {
+          cy.resize();
+
+          // 平滑地重新适配视图
+          cy.animate({
+            fit: {
+              eles: cy.elements(),
+              padding: 50
+            },
+            duration: 300,
+            easing: 'ease-in-out'
+          });
+        }
+      }, 250); // 250ms 防抖延迟
+    };
+
+    window.addEventListener('resize', handleResize);
 
     // 清理函数
     return () => {
-      window.removeEventListener('resize', resizeOverlay);
+      window.removeEventListener('resize', handleResize);
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
       if (cyRef.current) {
         cyRef.current.off('render', renderHyperedgeHulls);
         cyRef.current.off('viewport', renderHyperedgeHulls);
@@ -336,6 +495,74 @@ const GraphCanvas = ({ data, onNodeClick, onEdgeClick, onNodeDoubleClick, focusN
     };
   }, []); // 只在组件挂载时初始化一次
 
+  // 应用设置到 Cytoscape 样式（实时更新）
+  useEffect(() => {
+    if (!cyRef.current || !settings) return;
+
+    const cy = cyRef.current;
+    if (cy.destroyed()) return;
+
+    // 更新节点样式
+    cy.style()
+      .selector('node')
+      .style({
+        'font-size': `${settings.node.fontSize}px`,
+        'font-weight': settings.node.fontWeight,
+      })
+      .selector('node[type="person"]')
+      .style({
+        'background-color': settings.colorScheme.person,
+      })
+      .selector('node[type="organization"]')
+      .style({
+        'background-color': settings.colorScheme.organization,
+      })
+      .selector('node[type="location"]')
+      .style({
+        'background-color': settings.colorScheme.location,
+      })
+      .selector('node[type="event"]')
+      .style({
+        'background-color': settings.colorScheme.event,
+      })
+      .selector('node[type="concept"]')
+      .style({
+        'background-color': settings.colorScheme.concept,
+      })
+      .selector('node:not([type])')
+      .style({
+        'background-color': settings.colorScheme.default,
+      })
+      .selector('edge')
+      .style({
+        'line-color': settings.colorScheme.edge,
+        'target-arrow-color': settings.colorScheme.edge,
+      })
+      .selector('edge.query-path-low')
+      .style({
+        'background-color': settings.colorScheme.queryPathLow,
+      })
+      .selector('edge.query-path-medium')
+      .style({
+        'background-color': settings.colorScheme.queryPathMedium,
+      })
+      .selector('edge.query-path-high')
+      .style({
+        'background-color': settings.colorScheme.queryPathHigh,
+      })
+      .update();
+
+    // 更新节点大小（基于权重和设置）
+    cy.nodes().forEach(node => {
+      const weight = node.data('weight') || 1;
+      const minSize = settings.node.minSize;
+      const maxSize = settings.node.maxSize;
+      const size = Math.max(minSize, Math.min(maxSize, minSize + weight * (maxSize - minSize) / 20));
+      node.style('width', size);
+      node.style('height', size);
+    });
+  }, [settings]);
+
   // 转换数据并渲染图
   useEffect(() => {
     if (!cyRef.current || !data) return;
@@ -344,6 +571,10 @@ const GraphCanvas = ({ data, onNodeClick, onEdgeClick, onNodeDoubleClick, focusN
 
     // 检查实例是否已销毁
     if (cy.destroyed()) return;
+
+    // 计算节点大小（使用设置或默认值）
+    const minSize = settings?.node.minSize || 20;
+    const maxSize = settings?.node.maxSize || 60;
 
     // 转换节点数据为 Cytoscape 格式
     const cytoscapeNodes = data.nodes.map(node => ({
@@ -355,7 +586,7 @@ const GraphCanvas = ({ data, onNodeClick, onEdgeClick, onNodeDoubleClick, focusN
         weight: node.weight,
         relevanceScore: node.relevanceScore,
         // 根据权重设置节点大小
-        size: Math.max(20, Math.min(60, 20 + node.weight * 20)),
+        size: Math.max(minSize, Math.min(maxSize, minSize + node.weight * (maxSize - minSize) / 20)),
       }
     }));
 
@@ -387,33 +618,55 @@ const GraphCanvas = ({ data, onNodeClick, onEdgeClick, onNodeDoubleClick, focusN
       cy.add([...cytoscapeNodes, ...cytoscapeEdges]);
     });
 
-    // 应用 cose-bilkent 高质量力导向布局
-    const layout = cy.layout({
-      name: 'cose-bilkent',
-      // @ts-ignore - cose-bilkent 特定选项
-      animate: 'end',
-      animationDuration: 1000,
-      // 布局参数优化
-      idealEdgeLength: 120,
-      nodeRepulsion: 6000,
-      gravity: 0.5,
-      numIter: 2500,
-      tile: true,
-      randomize: true,
-      tilingPaddingVertical: 10,
-      tilingPaddingHorizontal: 10,
-    });
+    // 如果有导入的布局，应用它；否则使用力导向布局
+    if (importedLayout) {
+      // 应用导入的布局位置
+      cy.batch(() => {
+        cy.nodes().forEach((node) => {
+          const pos = importedLayout[node.id()];
+          if (pos) {
+            node.position(pos);
+          }
+        });
+      });
 
-    layout.run();
+      // 适配视图以显示所有节点
+      cy.fit(undefined, 50);
+    } else {
+      // 应用 cose-bilkent 高质量力导向布局（使用设置或默认值）
+      const layoutSettings = settings?.layout || {
+        idealEdgeLength: 120,
+        nodeRepulsion: 6000,
+        gravity: 0.5,
+        numIter: 2500,
+      };
 
-    // 清理函数：停止布局动画
-    return () => {
-      if (layout && typeof layout.stop === 'function') {
-        layout.stop();
-      }
-    };
+      const layout = cy.layout({
+        name: 'cose-bilkent',
+        // @ts-ignore - cose-bilkent 特定选项
+        animate: 'end',
+        animationDuration: 1000,
+        // 布局参数优化
+        idealEdgeLength: layoutSettings.idealEdgeLength,
+        nodeRepulsion: layoutSettings.nodeRepulsion,
+        gravity: layoutSettings.gravity,
+        numIter: layoutSettings.numIter,
+        tile: true,
+        randomize: true,
+        tilingPaddingVertical: 10,
+        tilingPaddingHorizontal: 10,
+      });
 
-  }, [data]);
+      layout.run();
+
+      // 清理函数：停止布局动画
+      return () => {
+        if (layout && typeof layout.stop === 'function') {
+          layout.stop();
+        }
+      };
+    }
+  }, [data, importedLayout, settings]);
 
   // 设置事件监听器
   useEffect(() => {
@@ -573,6 +826,134 @@ const GraphCanvas = ({ data, onNodeClick, onEdgeClick, onNodeDoubleClick, focusN
     cy.on('mouseout', 'edge', handleEdgeMouseout);
     cy.on('mousemove', 'edge', handleEdgeMousemove);
 
+    // 移动端手势支持
+    let touchStartDistance = 0;
+    let touchStartZoom = 1;
+    let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+    let longPressTarget: NodeSingular | null = null;
+
+    // 双指缩放 (Pinch Zoom)
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        // 双指触摸开始
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        touchStartDistance = Math.hypot(
+          touch2.clientX - touch1.clientX,
+          touch2.clientY - touch1.clientY
+        );
+        touchStartZoom = cy.zoom();
+        e.preventDefault();
+      } else if (e.touches.length === 1) {
+        // 单指触摸 - 检测长按
+        const touch = e.touches[0];
+        const rect = cy.container()!.getBoundingClientRect();
+        const renderedPosition = {
+          x: touch.clientX - rect.left,
+          y: touch.clientY - rect.top
+        };
+
+        // 使用 Cytoscape 的 API 查找触摸位置的元素
+        const target = cy.elements().filter((ele) => {
+          if (!ele.isNode()) return false;
+          const bb = ele.renderedBoundingBox();
+          return (
+            renderedPosition.x >= bb.x1 &&
+            renderedPosition.x <= bb.x2 &&
+            renderedPosition.y >= bb.y1 &&
+            renderedPosition.y <= bb.y2
+          );
+        }).first();
+
+        if (target && target.isNode()) {
+          longPressTarget = target as NodeSingular;
+          longPressTimer = setTimeout(() => {
+            // 长按触发 - 显示上下文菜单或详情
+            if (longPressTarget) {
+              // 触发震动反馈（如果支持）
+              if (navigator.vibrate) {
+                navigator.vibrate(50);
+              }
+              // 选中节点并显示详情
+              cy.elements().unselect();
+              longPressTarget.select();
+              if (onNodeClick) {
+                const nodeData = longPressTarget.data();
+                onNodeClick({
+                  id: nodeData.id,
+                  label: nodeData.label,
+                  type: nodeData.type,
+                  description: nodeData.description,
+                  weight: nodeData.weight,
+                  relevanceScore: nodeData.relevanceScore,
+                });
+              }
+            }
+          }, 500); // 500ms 长按阈值
+        }
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        // 双指缩放
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        const currentDistance = Math.hypot(
+          touch2.clientX - touch1.clientX,
+          touch2.clientY - touch1.clientY
+        );
+
+        if (touchStartDistance > 0) {
+          const scale = currentDistance / touchStartDistance;
+          const newZoom = touchStartZoom * scale;
+
+          // 限制缩放范围
+          const clampedZoom = Math.max(0.1, Math.min(10, newZoom));
+
+          // 计算缩放中心点（两指中点）
+          const centerX = (touch1.clientX + touch2.clientX) / 2;
+          const centerY = (touch1.clientY + touch2.clientY) / 2;
+          const rect = cy.container()!.getBoundingClientRect();
+          const renderedPosition = {
+            x: centerX - rect.left,
+            y: centerY - rect.top
+          };
+
+          cy.zoom({
+            level: clampedZoom,
+            renderedPosition: renderedPosition
+          });
+        }
+        e.preventDefault();
+      }
+
+      // 取消长按
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+        longPressTarget = null;
+      }
+    };
+
+    const handleTouchEnd = () => {
+      touchStartDistance = 0;
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+        longPressTarget = null;
+      }
+    };
+
+    // 添加触摸事件监听
+    const container = cy.container();
+    if (container) {
+      container.addEventListener('touchstart', handleTouchStart, { passive: false });
+      container.addEventListener('touchmove', handleTouchMove, { passive: false });
+      container.addEventListener('touchend', handleTouchEnd);
+      container.addEventListener('touchcancel', handleTouchEnd);
+    }
+
     // 清理事件监听器
     return () => {
       if (cy && !cy.destroyed()) {
@@ -588,6 +969,17 @@ const GraphCanvas = ({ data, onNodeClick, onEdgeClick, onNodeDoubleClick, focusN
       }
       if (tooltip && tooltip.parentNode) {
         document.body.removeChild(tooltip);
+      }
+      // 清理触摸事件监听器
+      if (container) {
+        container.removeEventListener('touchstart', handleTouchStart);
+        container.removeEventListener('touchmove', handleTouchMove);
+        container.removeEventListener('touchend', handleTouchEnd);
+        container.removeEventListener('touchcancel', handleTouchEnd);
+      }
+      // 清理长按定时器
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
       }
     };
   }, [onNodeClick, onEdgeClick, onNodeDoubleClick]);
@@ -638,13 +1030,180 @@ const GraphCanvas = ({ data, onNodeClick, onEdgeClick, onNodeDoubleClick, focusN
     }
   }, [focusNodeId]); // 移除 onNodeClick 依赖，避免无限循环
 
+  // 高亮查询路径（支持动画）
+  useEffect(() => {
+    if (!cyRef.current) return;
+
+    const cy = cyRef.current;
+
+    // 检查实例是否已销毁
+    if (cy.destroyed()) return;
+
+    // 移除之前的高亮
+    cy.elements().removeClass('query-path query-path-low query-path-medium query-path-high query-path-high query-mode-local query-mode-global query-mode-both');
+
+    // 重置所有节点的样式
+    cy.nodes().forEach(node => {
+      const originalSize = node.data('size') || 30;
+      node.style('width', originalSize);
+      node.style('height', originalSize);
+      node.style('opacity', 1);
+    });
+
+    if (!queryPath || !queryPath.nodes || queryPath.nodes.length === 0) {
+      return;
+    }
+
+    // 确定要高亮的节点范围（用于动画）
+    let nodesToHighlight = animationStep !== null && animationStep !== undefined
+      ? queryPath.nodes.slice(0, animationStep + 1) // 动画模式：只显示到当前步骤
+      : queryPath.nodes; // 非动画模式：显示所有节点
+
+    // 在 hybrid 模式下，根据 showLocalPath 和 showGlobalPath 过滤节点
+    if (queryMode === 'hybrid' && queryPath.nodeTypes) {
+      nodesToHighlight = nodesToHighlight.filter(nodeId => {
+        const nodeType = queryPath.nodeTypes![nodeId];
+        if (!nodeType) return true; // 如果没有类型信息，默认显示
+
+        if (nodeType === 'both') return true; // 两种模式都检索到的节点总是显示
+        if (nodeType === 'local' && !showLocalPath) return false;
+        if (nodeType === 'global' && !showGlobalPath) return false;
+
+        return true;
+      });
+    }
+
+    // 高亮路径中的节点，根据相关性得分和查询模式设置不同的样式
+    nodesToHighlight.forEach((nodeId, index) => {
+      const node = cy.getElementById(nodeId);
+      if (node.length > 0) {
+        const score = queryPath.scores[nodeId] || 0;
+        const nodeType = queryPath.nodeTypes?.[nodeId];
+
+        // 如果是 hybrid 模式且有 nodeTypes 信息，使用模式颜色
+        if (queryMode === 'hybrid' && nodeType) {
+          // 使用查询模式颜色
+          if (nodeType === 'local') {
+            node.addClass('query-mode-local');
+          } else if (nodeType === 'global') {
+            node.addClass('query-mode-global');
+          } else if (nodeType === 'both') {
+            node.addClass('query-mode-both');
+          }
+        } else {
+          // 使用相关性得分颜色（非 hybrid 模式或没有 nodeTypes 信息）
+          let highlightClass = 'query-path-low';
+
+          if (score >= 0.7) {
+            highlightClass = 'query-path-high';
+          } else if (score >= 0.4) {
+            highlightClass = 'query-path-medium';
+          }
+
+          node.addClass(highlightClass);
+        }
+
+        // 根据相关性得分动态调整节点大小
+        let sizeMultiplier = 1.2;
+        if (score >= 0.7) {
+          sizeMultiplier = 1.5;
+        } else if (score >= 0.4) {
+          sizeMultiplier = 1.35;
+        }
+
+        const originalSize = node.data('size') || 30;
+        const newSize = originalSize * sizeMultiplier;
+
+        // 在动画模式下，当前步骤的节点使用脉冲效果
+        if (animationStep !== null && animationStep !== undefined && index === animationStep) {
+          node.animate({
+            style: {
+              'width': newSize * 1.2,
+              'height': newSize * 1.2,
+              'opacity': 1,
+            }
+          }, {
+            duration: 300,
+            easing: 'ease-out',
+          });
+        } else {
+          node.style('width', newSize);
+          node.style('height', newSize);
+
+          // 根据得分设置透明度（0.6 到 1.0）
+          const opacity = Math.max(0.6, Math.min(1.0, 0.5 + score * 0.5));
+          node.style('opacity', opacity);
+        }
+      }
+    });
+
+    // 高亮路径中的边，根据边的权重设置不同样式
+    // 在动画模式下，只显示已访问节点之间的边
+    queryPath.edges.forEach(edgeId => {
+      const edge = cy.getElementById(edgeId);
+      if (edge.length > 0) {
+        const source = edge.data('source');
+        const target = edge.data('target');
+
+        // 检查边的两端节点是否都已被访问
+        const sourceVisited = nodesToHighlight.includes(source);
+        const targetVisited = nodesToHighlight.includes(target);
+
+        if (sourceVisited && targetVisited) {
+          const weight = edge.data('weight') || 0;
+
+          // 高权重边使用更明显的高亮
+          if (weight >= 0.7) {
+            edge.addClass('query-path-high');
+          } else {
+            edge.addClass('query-path');
+          }
+        }
+      }
+    });
+
+    // 如果有路径节点，聚焦到所有高亮的元素
+    if (nodesToHighlight.length > 0) {
+      const highlightedElements = cy.elements('.query-path-low, .query-path-medium, .query-path-high, .query-path, .query-path-high');
+
+      if (highlightedElements.length > 0) {
+        // 在动画模式下，聚焦到当前节点
+        if (animationStep !== null && animationStep !== undefined && animationStep < queryPath.nodes.length) {
+          const currentNode = cy.getElementById(queryPath.nodes[animationStep]);
+          if (currentNode.length > 0) {
+            cy.animate({
+              center: {
+                eles: currentNode
+              },
+              zoom: Math.max(cy.zoom(), 1.0),
+              duration: 400,
+              easing: 'ease-in-out'
+            });
+          }
+        } else if (animationStep === null || animationStep === undefined) {
+          // 非动画模式：适配所有高亮元素
+          cy.animate({
+            fit: {
+              eles: highlightedElements,
+              padding: 50,
+            },
+            duration: 600,
+            easing: 'ease-in-out'
+          });
+        }
+      }
+    }
+  }, [queryPath, animationStep, showLocalPath, showGlobalPath, queryMode]);
+
   return (
     <div
       ref={containerRef}
-      className="w-full h-full bg-white"
-      style={{ minHeight: '600px' }}
+      className="w-full h-full bg-white transition-all duration-300 ease-in-out"
+      style={{ minHeight: '400px' }}
     />
   );
-};
+});
+
+GraphCanvas.displayName = 'GraphCanvas';
 
 export default GraphCanvas;

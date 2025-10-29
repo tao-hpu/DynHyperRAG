@@ -35,7 +35,21 @@ Haoran Luo, Haihong E, Guanting Chen, et al. **NeurIPS 2025**
    - Enhanced `script_query.py` with configurable query parameters
    - Better error messages and user feedback
 
-5. **🔬 Production-Ready Features**
+5. **🎨 Interactive Web Visualization**
+   - Modern React-based web UI for graph exploration
+   - Real-time search and filtering capabilities
+   - Query path visualization with animation
+   - Export functionality (PNG, SVG, JSON)
+   - See: [Web UI Documentation](web_ui/README.md)
+
+6. **🧪 Comprehensive Testing Suite**
+   - 91+ unit and integration tests (88.3% pass rate)
+   - Component tests for all UI elements
+   - Service and store integration tests
+   - E2E test framework with Playwright
+   - See: [Testing Guide](web_ui/TESTING_GUIDE.md)
+
+7. **🔬 Production-Ready Features**
    - Comprehensive logging
    - Automatic retry with exponential backoff
    - Configurable query modes (local/global/hybrid/naive)
@@ -127,6 +141,28 @@ python script_query.py
 
 **Output**: Runs a sample complex query using hybrid mode (local + global retrieval)
 
+#### 3. Launch Web Visualization (Optional)
+```bash
+# Start backend API
+python3 -m uvicorn api.main:app --host 0.0.0.0 --port 3401
+
+# In another terminal, start frontend
+cd web_ui
+pnpm install
+pnpm dev
+```
+
+**Access**: Open http://localhost:3400 in your browser
+
+**Features**:
+- Interactive graph visualization with Cytoscape.js
+- Real-time node/edge search and filtering
+- Query execution with path visualization
+- Export graphs as PNG, SVG, or JSON
+- Responsive design for mobile/tablet/desktop
+
+📖 Full guide: [Web UI Documentation](web_ui/README.md)
+
 ---
 
 ## 📂 Project Structure
@@ -138,12 +174,23 @@ HyperGraphRAG/
 ├── script_construct.py       # Enhanced construction script
 ├── script_query.py          # Enhanced query script
 ├── hypergraphrag/           # Core library
+├── api/                     # FastAPI backend for visualization
+│   ├── main.py              # API entry point
+│   ├── routes/              # API endpoints
+│   ├── services/            # Business logic
+│   └── models/              # Data models
+├── web_ui/                  # React-based web visualization
+│   ├── src/                 # Frontend source code
+│   ├── e2e/                 # E2E tests (Playwright)
+│   ├── TESTING_GUIDE.md     # Testing documentation
+│   └── TEST_SUMMARY.md      # Test results
 ├── docs/                    # Comprehensive documentation
 │   ├── QUICKSTART.md        # Quick start guide (中文)
 │   ├── SETUP.md             # Setup guide (中文)
 │   ├── performance-analysis.md  # Performance & advantage analysis
 │   ├── troubleshooting.md   # Troubleshooting guide
-│   └── architecture.md      # Architecture & design
+│   ├── architecture.md      # Architecture & design
+│   └── visualization/       # Visualization documentation
 └── evaluation/              # Evaluation scripts
 ```
 
@@ -199,8 +246,10 @@ This is a research fork. Contributions are welcome!
 - [ ] Optimization for large-scale documents
 - [ ] Advanced hyperedge extraction algorithms
 - [ ] Multi-language support
-- [ ] Visualization tools for hypergraph exploration
+- [x] Visualization tools for hypergraph exploration ✅
+- [x] Comprehensive testing infrastructure ✅
 - [ ] Integration with other vector databases
+- [ ] Performance optimization for web UI
 
 ---
 

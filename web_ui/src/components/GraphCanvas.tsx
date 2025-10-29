@@ -8,6 +8,7 @@ import type { QueryPath } from '@/types/query';
 import type { VisualizationSettings } from '@/types/settings';
 import { exportToPNG, exportToSVG, exportToJSON } from '@/utils/exportUtils';
 import type { ExportOptions } from '@/components/ExportPanel';
+import { ViewportCullingManager } from '@/utils/viewportCulling';
 
 // 注册 cose-bilkent 布局插件
 cytoscape.use(coseBilkent);
@@ -38,6 +39,7 @@ export interface GraphCanvasRef {
 const GraphCanvas = forwardRef<GraphCanvasRef, GraphCanvasProps>(({ data, settings, onNodeClick, onEdgeClick, onNodeDoubleClick, focusNodeId, queryPath, animationStep, showLocalPath = true, showGlobalPath = true, queryMode, importedLayout }, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<Core | null>(null);
+  const cullingManagerRef = useRef<ViewportCullingManager | null>(null);
 
   // 暴露导出方法给父组件
   useImperativeHandle(ref, () => ({
@@ -333,6 +335,14 @@ const GraphCanvas = forwardRef<GraphCanvasRef, GraphCanvasProps>(({ data, settin
 
     cyRef.current = cy;
 
+    // 初始化视口裁剪管理器（性能优化）
+    cullingManagerRef.current = new ViewportCullingManager(cy, {
+      enabled: true,
+      padding: 100,
+      minZoom: 0.5, // 只在缩放小于 0.5 时启用裁剪
+      throttleDelay: 100,
+    });
+
     // 创建凸包渲染的 Canvas overlay
     const container = containerRef.current;
     const overlayCanvas = document.createElement('canvas');
@@ -482,6 +492,10 @@ const GraphCanvas = forwardRef<GraphCanvasRef, GraphCanvasProps>(({ data, settin
       window.removeEventListener('resize', handleResize);
       if (resizeTimeout) {
         clearTimeout(resizeTimeout);
+      }
+      if (cullingManagerRef.current) {
+        cullingManagerRef.current.destroy();
+        cullingManagerRef.current = null;
       }
       if (cyRef.current) {
         cyRef.current.off('render', renderHyperedgeHulls);

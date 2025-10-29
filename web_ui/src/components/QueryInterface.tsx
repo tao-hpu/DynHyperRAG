@@ -108,7 +108,7 @@ const QueryInterface = ({ onQuerySubmit, isLoading = false }: QueryInterfaceProp
             <div>
                 <button
                     onClick={() => setShowAdvanced(!showAdvanced)}
-                    className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                    className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 cursor-pointer"
                     disabled={isLoading}
                 >
                     <svg

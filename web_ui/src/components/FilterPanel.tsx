@@ -15,7 +15,7 @@ const FilterPanel = ({ onFilterChange, availableTypes }: FilterPanelProps) => {
     const newTypes = selectedTypes.includes(type)
       ? selectedTypes.filter(t => t !== type)
       : [...selectedTypes, type];
-    
+
     setSelectedTypes(newTypes);
     onFilterChange({
       entityTypes: newTypes,
@@ -53,7 +53,7 @@ const FilterPanel = ({ onFilterChange, availableTypes }: FilterPanelProps) => {
           {selectedTypes.length > 0 && (
             <button
               onClick={handleReset}
-              className="text-xs text-blue-600 hover:text-blue-800"
+              className="text-xs text-blue-600 hover:text-blue-800 cursor-pointer"
             >
               Reset
             </button>

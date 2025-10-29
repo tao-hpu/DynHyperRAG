@@ -71,7 +71,7 @@ const SearchBar = ({ onNodeSelect }: SearchBarProps) => {
             <button
               key={node.id}
               onClick={() => handleResultClick(node.id)}
-              className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
+              className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors cursor-pointer"
             >
               <div className="font-medium text-gray-900">{node.label}</div>
               <div className="flex items-center gap-2 mt-1">

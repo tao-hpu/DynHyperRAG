@@ -15,7 +15,7 @@ const QueryResult = ({ result, onClose }: QueryResultProps) => {
                 {onClose && (
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                        className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
                         aria-label="Close result"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

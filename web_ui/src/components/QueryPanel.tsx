@@ -107,7 +107,7 @@ const QueryPanel = ({ onQueryExecuted, onModeChange }: QueryPanelProps) => {
             <div className="flex border-b border-gray-200 bg-white">
                 <button
                     onClick={() => setActiveTab('query')}
-                    className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'query'
+                    className={`flex-1 px-4 py-3 text-sm font-medium transition-colors cursor-pointer ${activeTab === 'query'
                         ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
                         : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
                         }`}
@@ -122,7 +122,7 @@ const QueryPanel = ({ onQueryExecuted, onModeChange }: QueryPanelProps) => {
                 <button
                     onClick={() => setActiveTab('result')}
                     disabled={!currentResponse}
-                    className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'result'
+                    className={`flex-1 px-4 py-3 text-sm font-medium transition-colors cursor-pointer ${activeTab === 'result'
                         ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
                         : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed'
                         }`}
@@ -136,7 +136,7 @@ const QueryPanel = ({ onQueryExecuted, onModeChange }: QueryPanelProps) => {
                 </button>
                 <button
                     onClick={() => setActiveTab('history')}
-                    className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'history'
+                    className={`flex-1 px-4 py-3 text-sm font-medium transition-colors cursor-pointer ${activeTab === 'history'
                         ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
                         : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
                         }`}
@@ -240,7 +240,7 @@ const QueryPanel = ({ onQueryExecuted, onModeChange }: QueryPanelProps) => {
                                             </div>
                                             <button
                                                 onClick={() => removeFromHistory(item.id)}
-                                                className="flex-shrink-0 text-gray-400 hover:text-red-600 transition-colors"
+                                                className="flex-shrink-0 text-gray-400 hover:text-red-600 transition-colors cursor-pointer"
                                                 aria-label="Remove from history"
                                             >
                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

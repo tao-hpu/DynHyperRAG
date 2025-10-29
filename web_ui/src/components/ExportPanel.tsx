@@ -70,27 +70,27 @@ const ExportPanel = ({ onExport, onImport }: ExportPanelProps) => {
                     <div className="grid grid-cols-3 gap-2">
                         <button
                             onClick={() => setSelectedFormat('png')}
-                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedFormat === 'png'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${selectedFormat === 'png'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                 }`}
                         >
                             PNG
                         </button>
                         <button
                             onClick={() => setSelectedFormat('svg')}
-                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedFormat === 'svg'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${selectedFormat === 'svg'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                 }`}
                         >
                             SVG
                         </button>
                         <button
                             onClick={() => setSelectedFormat('json')}
-                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedFormat === 'json'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${selectedFormat === 'json'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                 }`}
                         >
                             JSON
@@ -196,9 +196,9 @@ const ExportPanel = ({ onExport, onImport }: ExportPanelProps) => {
                 <button
                     onClick={handleExport}
                     disabled={isExporting}
-                    className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${isExporting
-                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                    className={`w-full py-2 px-4 rounded-lg font-medium transition-colors cursor-pointer ${isExporting
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
                         }`}
                 >
                     {isExporting ? (

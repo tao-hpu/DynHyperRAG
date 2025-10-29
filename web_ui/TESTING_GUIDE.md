@@ -1,262 +1,334 @@
-# 可视化功能测试指南
+# Testing Guide - HyperGraphRAG Web UI
 
-## 🧪 测试清单
+## Overview
 
-### 1. 基础渲染测试
+This guide provides comprehensive information about the testing infrastructure for the HyperGraphRAG visualization frontend.
 
-#### ✅ 页面加载
-- [ ] 打开 http://localhost:3400
-- [ ] 看到 "HyperGraphRAG Visualization" 标题
-- [ ] 看到 "Loading graph data..." 加载动画
-- [ ] 图谱在 2-3 秒内加载完成
+## Test Structure
 
-#### ✅ 节点渲染
-- [ ] 节点显示为圆形
-- [ ] 节点有不同颜色（绿、橙、紫、粉、青）
-- [ ] 节点大小不同（根据权重）
-- [ ] 节点显示标签文字
-
-#### ✅ 边渲染
-- [ ] 普通边：灰色细线
-- [ ] 超边：橙色粗线
-- [ ] 边有箭头指向
-- [ ] 边使用贝塞尔曲线
-
-### 2. 超边凸包测试
-
-#### ✅ 凸包区域
-- [ ] 超边周围有半透明橙色区域
-- [ ] 区域包围所有连接的实体
-- [ ] 区域边界是虚线
-- [ ] 区域随节点移动更新
-
-#### ✅ 超边识别
-打开浏览器控制台，应该看到：
 ```
-Graph edges: X total (Y hyperedges, Z regular)
-```
+web_ui/
+├── src/
+│   ├── components/
+│   │   └── __tests__/          # Component unit tests
+│   │       ├── SearchBar.test.tsx
+│   │       ├── FilterPanel.test.tsx
+│   │       ├── QueryInterface.test.tsx
+│   │       └── GraphCanvas.test.tsx
+│   ├── services/
+│   │   └── __tests__/          # Service integration tests
+│   │       ├── graphService.test.ts
+│   │       └── queryService.test.ts
+│   ├── stores/
+│   │   └── __tests__/          # Store integration tests
+│   │       ├── graphStore.test.ts
+│   │       └── queryStore.test.ts
+│   ├── test/
+│   │   ├── setup.ts            # Test setup and global mocks
+│   │   └── mockData.ts         # Shared mock data
+│   └── utils/
+│       └── __tests__/          # Utility tests
+│           └── performance.test.ts
+├── e2e/                        # E2E tests (Playwright)
+│   ├── README.md
+│   └── visualization.spec.ts
+├── vitest.config.ts            # Vitest configuration
+├── playwright.config.ts        # Playwright configuration
+└── TEST_SUMMARY.md             # Test results summary
 
-验证：
-- [ ] Y > 0（有超边）
-- [ ] 橙色粗线对应超边数量
-
-### 3. 布局测试
-
-#### ✅ cose-bilkent 布局
-- [ ] 节点分布均匀
-- [ ] 边交叉较少
-- [ ] 有动画过渡效果（1 秒）
-- [ ] 布局稳定（不抖动）
-
-#### ✅ 布局质量
-对比指标：
-- 节点重叠：应该很少或没有
-- 边长度：大致相等（~100px）
-- 整体美观：清晰易读
-
-### 4. 交互测试
-
-#### ✅ 鼠标操作
-- [ ] **单击节点**：右侧显示节点详情
-- [ ] **单击边**：右侧显示边详情
-- [ ] **双击节点**：展开邻居节点
-- [ ] **拖拽节点**：节点跟随鼠标移动
-- [ ] **滚轮**：缩放画布
-- [ ] **拖拽画布**：平移视图
-
-#### ✅ 悬停提示
-- [ ] 鼠标悬停节点：显示 tooltip
-  - 标签
-  - 类型
-  - 权重
-- [ ] 鼠标悬停边：显示 tooltip
-  - 描述
-  - 关系
-  - 权重
-- [ ] 鼠标悬停超边：显示特殊 tooltip
-  - "⚡ Hyperedge (N entities)"
-  - 实体列表
-
-#### ✅ 选中状态
-- [ ] 选中节点：红色边框高亮
-- [ ] 选中边：红色加粗
-- [ ] 点击空白：取消选中
-
-### 5. 搜索和过滤测试
-
-#### ✅ 搜索功能
-- [ ] 输入节点名称
-- [ ] 看到搜索建议
-- [ ] 点击建议：聚焦到节点
-- [ ] 节点被选中并居中显示
-
-#### ✅ 过滤功能
-- [ ] 选择实体类型：只显示该类型节点
-- [ ] 调整权重范围：边数量变化
-- [ ] 孤立节点自动移除
-- [ ] 过滤后布局重新计算
-
-### 6. 详情面板测试
-
-#### ✅ 节点详情
-点击节点后，右侧应显示：
-- [ ] "Selected Node" 标题
-- [ ] ID
-- [ ] Label
-- [ ] Type（带颜色标签）
-- [ ] Description
-- [ ] Weight
-- [ ] Relevance Score（如果有）
-
-#### ✅ 边详情
-点击边后，右侧应显示：
-- [ ] "Selected Edge" 标题
-- [ ] Type（Regular Edge / Hyperedge）
-- [ ] Description
-- [ ] Weight
-- [ ] Relation
-
-#### ✅ 超边详情
-点击超边后，额外显示：
-- [ ] "⚡ This is a hyperedge connecting N entities"
-- [ ] 实体列表（橙色背景）
-
-### 7. 性能测试
-
-#### ✅ 渲染性能
-打开浏览器开发者工具 → Performance：
-- [ ] 初始渲染 < 2 秒
-- [ ] 交互响应 < 16ms（60 FPS）
-- [ ] 缩放平滑无卡顿
-- [ ] 拖拽节点流畅
-
-#### ✅ 内存使用
-打开浏览器开发者工具 → Memory：
-- [ ] 初始内存 < 100MB
-- [ ] 无明显内存泄漏
-- [ ] 长时间使用稳定
-
-### 8. 浏览器兼容性测试
-
-#### ✅ Chrome/Edge
-- [ ] 所有功能正常
-- [ ] 性能良好
-
-#### ✅ Firefox
-- [ ] 所有功能正常
-- [ ] 性能良好
-
-#### ✅ Safari
-- [ ] 所有功能正常
-- [ ] 性能良好
-
-## 🐛 常见问题排查
-
-### 问题 1：图谱不显示
-**检查**：
-1. 后端是否运行？`curl http://localhost:3401/api/health`
-2. 浏览器控制台是否有错误？
-3. 网络请求是否成功？（开发者工具 → Network）
-
-### 问题 2：超边凸包不显示
-**检查**：
-1. 浏览器控制台是否有 "Graph edges: X total (Y hyperedges, Z regular)"？
-2. Y 是否 > 0？
-3. 是否有橙色粗线？
-
-### 问题 3：布局效果不佳
-**尝试**：
-1. 刷新页面重新布局
-2. 调整过滤器减少节点数量
-3. 手动拖拽节点调整
-
-### 问题 4：性能卡顿
-**优化**：
-1. 减少显示的节点数量（使用过滤器）
-2. 关闭浏览器其他标签页
-3. 检查是否有内存泄漏
-
-## 📊 测试报告模板
-
-```markdown
-## 测试环境
-- 浏览器：Chrome 120.0.0
-- 操作系统：macOS 14.0
-- 节点数量：500
-- 边数量：500
-- 超边数量：150
-
-## 测试结果
-- ✅ 基础渲染：通过
-- ✅ 超边凸包：通过
-- ✅ 布局质量：通过
-- ✅ 交互功能：通过
-- ✅ 搜索过滤：通过
-- ✅ 详情面板：通过
-- ✅ 性能测试：通过
-
-## 发现的问题
-1. 无
-
-## 建议
-1. 考虑添加布局参数调整面板
-2. 可以增加更多实体类型颜色
 ```
 
-## 🎯 验收标准
+## Testing Technologies
 
-所有测试项通过，即可认为可视化功能完整实现：
+### Unit & Integration Tests
+- **Framework**: [Vitest](https://vitest.dev/) - Fast, Vite-native test runner
+- **Testing Library**: [@testing-library/react](https://testing-library.com/react) - User-centric testing utilities
+- **DOM Environment**: [happy-dom](https://github.com/capricorn86/happy-dom) - Lightweight DOM implementation
+- **Assertions**: [Vitest expect](https://vitest.dev/api/expect.html) + [@testing-library/jest-dom](https://github.com/testing-library/jest-dom)
 
-1. ✅ Cytoscape.js 正常工作
-2. ✅ cose-bilkent 布局生效
-3. ✅ 超边凸包正确渲染
-4. ✅ 所有交互功能正常
-5. ✅ 性能达标（60 FPS）
-6. ✅ 无明显 bug
+### E2E Tests
+- **Framework**: [Playwright](https://playwright.dev/) - Cross-browser automation
+- **Browsers**: Chromium, Firefox, WebKit
 
-## 🚀 快速验证命令
+## Quick Start
 
+### 1. Install Dependencies
 ```bash
-# 1. 确保后端运行
-curl http://localhost:3401/api/health
-
-# 2. 确保前端运行
-curl http://localhost:3400
-
-# 3. 检查依赖
 cd web_ui
-pnpm list cytoscape cytoscape-cose-bilkent
-
-# 4. 检查构建
-pnpm build
+pnpm install
 ```
 
-## 📸 截图检查点
+### 2. Run Unit & Integration Tests
+```bash
+# Run all tests once
+pnpm test
 
-建议截图保存以下场景：
-1. 初始加载完成的图谱
-2. 超边凸包渲染效果
-3. 节点详情面板
-4. 超边详情面板
-5. 搜索功能演示
-6. 过滤功能演示
+# Run tests in watch mode (auto-rerun on changes)
+pnpm test:watch
 
----
+# Run tests with UI (interactive)
+pnpm test:ui
 
-**测试完成后，请在浏览器控制台运行：**
-
-```javascript
-// 验证 Cytoscape 实例
-console.log('Cytoscape version:', cytoscape.version);
-
-// 验证布局
-console.log('Available layouts:', cytoscape.layouts);
-
-// 验证超边数量
-const cy = window.cy; // 如果暴露了全局变量
-if (cy) {
-  console.log('Total nodes:', cy.nodes().length);
-  console.log('Total edges:', cy.edges().length);
-  console.log('Hyperedges:', cy.edges('[?isHyperedge]').length);
-}
+# Run tests with coverage report
+pnpm test:coverage
 ```
+
+### 3. Run E2E Tests (Optional)
+```bash
+# Install Playwright (first time only)
+pnpm add -D @playwright/test
+pnpm exec playwright install
+
+# Start backend API (in separate terminal)
+python3 -m uvicorn api.main:app --host 0.0.0.0 --port 3401
+
+# Run E2E tests
+pnpm test:e2e
+
+# Run E2E tests in UI mode (interactive)
+pnpm test:e2e:ui
+```
+
+## Writing Tests
+
+### Component Tests
+
+Component tests focus on user interactions and rendered output.
+
+**Example: Testing a Button Component**
+```typescript
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import MyButton from '../MyButton';
+
+describe('MyButton', () => {
+  it('renders with text', () => {
+    render(<MyButton>Click me</MyButton>);
+    expect(screen.getByText('Click me')).toBeInTheDocument();
+  });
+
+  it('calls onClick when clicked', async () => {
+    const user = userEvent.setup();
+    const handleClick = vi.fn();
+    
+    render(<MyButton onClick={handleClick}>Click me</MyButton>);
+    
+    await user.click(screen.getByText('Click me'));
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+});
+```
+
+### Service Tests
+
+Service tests verify API interactions and data transformations.
+
+**Example: Testing an API Service**
+```typescript
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { myService } from '../myService';
+import api from '@/utils/api';
+
+vi.mock('@/utils/api');
+
+describe('MyService', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('fetches data successfully', async () => {
+    const mockData = { id: 1, name: 'Test' };
+    vi.mocked(api.get).mockResolvedValue({ data: mockData });
+
+    const result = await myService.getData();
+
+    expect(api.get).toHaveBeenCalledWith('/api/data');
+    expect(result).toEqual(mockData);
+  });
+});
+```
+
+### Store Tests
+
+Store tests verify state management logic.
+
+**Example: Testing a Zustand Store**
+```typescript
+import { describe, it, expect, beforeEach } from 'vitest';
+import { useMyStore } from '../myStore';
+
+describe('MyStore', () => {
+  beforeEach(() => {
+    // Reset store state
+    useMyStore.setState({ count: 0 });
+  });
+
+  it('increments count', () => {
+    const { increment } = useMyStore.getState();
+    
+    increment();
+    
+    expect(useMyStore.getState().count).toBe(1);
+  });
+});
+```
+
+### E2E Tests
+
+E2E tests verify complete user workflows.
+
+**Example: Testing a User Flow**
+```typescript
+import { test, expect } from '@playwright/test';
+
+test('user can search for nodes', async ({ page }) => {
+  await page.goto('/');
+  
+  // Type in search box
+  await page.fill('input[placeholder*="Search"]', 'test');
+  
+  // Wait for results
+  await page.waitForSelector('.search-result');
+  
+  // Click first result
+  await page.click('.search-result:first-child');
+  
+  // Verify node is selected
+  await expect(page.locator('.node-details')).toBeVisible();
+});
+```
+
+## Best Practices
+
+### General
+1. **Test behavior, not implementation** - Focus on what users see and do
+2. **Keep tests simple** - One concept per test
+3. **Use descriptive names** - Test names should explain what they verify
+4. **Avoid test interdependence** - Each test should run independently
+5. **Mock external dependencies** - API calls, timers, etc.
+
+### Component Tests
+1. **Query by accessibility** - Use `getByRole`, `getByLabelText` over `getByTestId`
+2. **User-centric queries** - Test what users see, not implementation details
+3. **Async properly** - Use `waitFor` for async updates
+4. **Setup user events** - Use `userEvent.setup()` for realistic interactions
+
+### Service Tests
+1. **Mock API calls** - Don't make real network requests
+2. **Test error cases** - Verify error handling
+3. **Test edge cases** - Empty responses, null values, etc.
+
+### Store Tests
+1. **Reset state** - Clean state between tests
+2. **Test actions** - Verify state changes
+3. **Test selectors** - Verify computed values
+
+## Debugging Tests
+
+### View Test Output
+```bash
+# Run specific test file
+pnpm test src/components/__tests__/SearchBar.test.tsx
+
+# Run tests matching pattern
+pnpm test SearchBar
+
+# Run with verbose output
+pnpm test --reporter=verbose
+```
+
+### Debug in Browser
+```bash
+# Open Vitest UI
+pnpm test:ui
+
+# Debug E2E tests
+pnpm exec playwright test --debug
+```
+
+### Common Issues
+
+#### Tests timing out
+- Increase timeout: `{ timeout: 10000 }`
+- Check for missing `await` on async operations
+- Verify mocks are returning resolved promises
+
+#### Elements not found
+- Use `screen.debug()` to see rendered HTML
+- Check if element is rendered asynchronously
+- Verify correct query method (getBy vs findBy vs queryBy)
+
+#### Mocks not working
+- Ensure `vi.mock()` is called before imports
+- Clear mocks between tests with `vi.clearAllMocks()`
+- Check mock implementation returns correct data structure
+
+## Coverage Reports
+
+### Generate Coverage
+```bash
+pnpm test:coverage
+```
+
+### View Coverage Report
+Coverage report is generated in `coverage/` directory:
+- `coverage/index.html` - Interactive HTML report
+- `coverage/coverage-final.json` - JSON data
+
+### Coverage Goals
+- **Statements**: > 80%
+- **Branches**: > 75%
+- **Functions**: > 80%
+- **Lines**: > 80%
+
+## CI/CD Integration
+
+### GitHub Actions Example
+```yaml
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install pnpm
+        run: npm install -g pnpm
+      
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: ./web_ui
+      
+      - name: Run tests
+        run: pnpm test
+        working-directory: ./web_ui
+      
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./web_ui/coverage/coverage-final.json
+```
+
+## Resources
+
+- [Vitest Documentation](https://vitest.dev/)
+- [Testing Library Documentation](https://testing-library.com/)
+- [Playwright Documentation](https://playwright.dev/)
+- [Testing Best Practices](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library)
+
+## Support
+
+For questions or issues:
+1. Check `TEST_SUMMARY.md` for current test status
+2. Review test examples in `src/**/__tests__/`
+3. Consult E2E test guide in `e2e/README.md`

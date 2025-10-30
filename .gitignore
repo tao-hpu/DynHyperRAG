@@ -188,8 +188,10 @@ evaluation/datasets/*
 evaluation/expr/*
 evaluation/results/*
 
-# Kiro IDE
+# IDE configurations
 .kiro/
+.claude/
+.vscode/
 
 # API
 api/__pycache__/

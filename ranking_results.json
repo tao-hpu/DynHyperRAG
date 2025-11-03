@@ -1,0 +1,342 @@
+[
+  {
+    "rank": 1,
+    "final_score": 0.8220151602021373,
+    "hyperedge_name": "<hyperedge>Relation_13",
+    "hyperedge": "Entity A has relationship type 13 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.8732320989138477,
+      "quality": 0.7020378390367599,
+      "dynamic_weight": 0.8739387951709274,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.873 + 0.3×0.702 + 0.2×0.874 = 0.822"
+    }
+  },
+  {
+    "rank": 2,
+    "final_score": 0.8028866499520471,
+    "hyperedge_name": "<hyperedge>Relation_11",
+    "hyperedge": "Entity A has relationship type 11 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.863207722973471,
+      "quality": 0.7743256613509816,
+      "dynamic_weight": 0.6949254503000855,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.863 + 0.3×0.774 + 0.2×0.695 = 0.803"
+    }
+  },
+  {
+    "rank": 3,
+    "final_score": 0.7734897198910423,
+    "hyperedge_name": "<hyperedge>Relation_12",
+    "hyperedge": "Entity A has relationship type 12 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.9379020937907168,
+      "quality": 0.5460473451854297,
+      "dynamic_weight": 0.7036223472002748,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.938 + 0.3×0.546 + 0.2×0.704 = 0.773"
+    }
+  },
+  {
+    "rank": 4,
+    "final_score": 0.7112109203153042,
+    "hyperedge_name": "<hyperedge>Relation_9",
+    "hyperedge": "Entity A has relationship type 9 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.9307458824930515,
+      "quality": 0.5187864543232074,
+      "dynamic_weight": 0.45101021385908135,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.931 + 0.3×0.519 + 0.2×0.451 = 0.711"
+    }
+  },
+  {
+    "rank": 5,
+    "final_score": 0.7034137590873368,
+    "hyperedge_name": "<hyperedge>Relation_19",
+    "hyperedge": "Entity A has relationship type 19 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.7916159233609671,
+      "quality": 0.6959351536835423,
+      "dynamic_weight": 0.49412625650895337,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.792 + 0.3×0.696 + 0.2×0.494 = 0.703"
+    }
+  },
+  {
+    "rank": 6,
+    "final_score": 0.6923364229468043,
+    "hyperedge_name": "<hyperedge>Relation_14",
+    "hyperedge": "Entity A has relationship type 14 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.7598084653655429,
+      "quality": 0.7579716935397002,
+      "dynamic_weight": 0.42520341101061426,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.760 + 0.3×0.758 + 0.2×0.425 = 0.692"
+    }
+  },
+  {
+    "rank": 7,
+    "final_score": 0.6920292285913416,
+    "hyperedge_name": "<hyperedge>Relation_7",
+    "hyperedge": "Entity A has relationship type 7 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.8642437055050219,
+      "quality": 0.30422419379073967,
+      "dynamic_weight": 0.8432005885080442,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.864 + 0.3×0.304 + 0.2×0.843 = 0.692"
+    }
+  },
+  {
+    "rank": 8,
+    "final_score": 0.6882712464619878,
+    "hyperedge_name": "<hyperedge>Relation_2",
+    "hyperedge": "Entity A has relationship type 2 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.6004448321669702,
+      "quality": 0.778706289206608,
+      "dynamic_weight": 0.7721847180826011,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.600 + 0.3×0.779 + 0.2×0.772 = 0.688"
+    }
+  },
+  {
+    "rank": 9,
+    "final_score": 0.684104875261706,
+    "hyperedge_name": "<hyperedge>Relation_3",
+    "hyperedge": "Entity A has relationship type 3 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.9014808054671803,
+      "quality": 0.35651024120912045,
+      "dynamic_weight": 0.6320570008268988,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.901 + 0.3×0.357 + 0.2×0.632 = 0.684"
+    }
+  },
+  {
+    "rank": 10,
+    "final_score": 0.6748911812415136,
+    "hyperedge_name": "<hyperedge>Relation_17",
+    "hyperedge": "Entity A has relationship type 17 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.7860579999189801,
+      "quality": 0.5371409163305547,
+      "dynamic_weight": 0.6035995319142855,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.786 + 0.3×0.537 + 0.2×0.604 = 0.675"
+    }
+  },
+  {
+    "rank": 11,
+    "final_score": 0.673432449675642,
+    "hyperedge_name": "<hyperedge>Relation_10",
+    "hyperedge": "Entity A has relationship type 10 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.5435223695750588,
+      "quality": 0.8508713381258488,
+      "dynamic_weight": 0.7320493172517901,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.544 + 0.3×0.851 + 0.2×0.732 = 0.673"
+    }
+  },
+  {
+    "rank": 12,
+    "final_score": 0.6605329595726553,
+    "hyperedge_name": "<hyperedge>Relation_8",
+    "hyperedge": "Entity A has relationship type 8 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.8141627277447021,
+      "quality": 0.5211628357366946,
+      "dynamic_weight": 0.48551372489647987,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.814 + 0.3×0.521 + 0.2×0.486 = 0.661"
+    }
+  },
+  {
+    "rank": 13,
+    "final_score": 0.6576571144157458,
+    "hyperedge_name": "<hyperedge>Relation_20",
+    "hyperedge": "Entity A has relationship type 20 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.8281070590776571,
+      "quality": 0.4062116209452534,
+      "dynamic_weight": 0.6087004929667063,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.828 + 0.3×0.406 + 0.2×0.609 = 0.658"
+    }
+  },
+  {
+    "rank": 14,
+    "final_score": 0.6504169796600096,
+    "hyperedge_name": "<hyperedge>Relation_6",
+    "hyperedge": "Entity A has relationship type 6 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.7452236662714475,
+      "quality": 0.44328640432645283,
+      "dynamic_weight": 0.7240961261317498,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.745 + 0.3×0.443 + 0.2×0.724 = 0.650"
+    }
+  },
+  {
+    "rank": 15,
+    "final_score": 0.6222317618715362,
+    "hyperedge_name": "<hyperedge>Relation_18",
+    "hyperedge": "Entity A has relationship type 18 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.5942781638471695,
+      "quality": 0.47353558433192366,
+      "dynamic_weight": 0.9151600232418716,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.594 + 0.3×0.474 + 0.2×0.915 = 0.622"
+    }
+  },
+  {
+    "rank": 16,
+    "final_score": 0.599001351942047,
+    "hyperedge_name": "<hyperedge>Relation_1",
+    "hyperedge": "Entity A has relationship type 1 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.7877420593060477,
+      "quality": 0.31625699089473347,
+      "dynamic_weight": 0.5512661251030155,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.788 + 0.3×0.316 + 0.2×0.551 = 0.599"
+    }
+  },
+  {
+    "rank": 17,
+    "final_score": 0.5364848823856079,
+    "hyperedge_name": "<hyperedge>Relation_15",
+    "hyperedge": "Entity A has relationship type 15 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.602554224043196,
+      "quality": 0.48810217634136965,
+      "dynamic_weight": 0.44388558730799516,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.603 + 0.3×0.488 + 0.2×0.444 = 0.536"
+    }
+  },
+  {
+    "rank": 18,
+    "final_score": 0.5362312232185134,
+    "hyperedge_name": "<hyperedge>Relation_5",
+    "hyperedge": "Entity A has relationship type 5 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.5119411863577387,
+      "quality": 0.4292444729463215,
+      "dynamic_weight": 0.7574364407787377,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.512 + 0.3×0.429 + 0.2×0.757 = 0.536"
+    }
+  },
+  {
+    "rank": 19,
+    "final_score": 0.5249278611516384,
+    "hyperedge_name": "<hyperedge>Relation_4",
+    "hyperedge": "Entity A has relationship type 4 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.5134087487471316,
+      "quality": 0.4421146836223422,
+      "dynamic_weight": 0.6779454084568493,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.513 + 0.3×0.442 + 0.2×0.678 = 0.525"
+    }
+  },
+  {
+    "rank": 20,
+    "final_score": 0.5226503245082391,
+    "hyperedge_name": "<hyperedge>Relation_16",
+    "hyperedge": "Entity A has relationship type 16 with Entity B through mechanism C",
+    "components": {
+      "similarity": 0.6047558988624636,
+      "quality": 0.3656509291163239,
+      "dynamic_weight": 0.5528854817105506,
+      "weights": {
+        "alpha": 0.5,
+        "beta": 0.3,
+        "gamma": 0.2
+      },
+      "computation": "0.5×0.605 + 0.3×0.366 + 0.2×0.553 = 0.523"
+    }
+  }
+]

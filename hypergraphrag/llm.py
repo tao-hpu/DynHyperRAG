@@ -9,7 +9,6 @@ from typing import List, Dict, Callable, Any, Union, Optional
 import aioboto3
 import aiohttp
 import numpy as np
-import ollama
 import torch
 from openai import (
     AsyncOpenAI,
@@ -18,6 +17,13 @@ from openai import (
     Timeout,
     AsyncAzureOpenAI,
 )
+
+# Optional imports
+try:
+    import ollama
+    OLLAMA_AVAILABLE = True
+except ImportError:
+    OLLAMA_AVAILABLE = False
 from pydantic import BaseModel, Field
 from tenacity import (
     retry,
@@ -319,6 +325,8 @@ async def ollama_model_if_cache(
     host = kwargs.pop("host", None)
     timeout = kwargs.pop("timeout", None)
     kwargs.pop("hashing_kv", None)
+    if not OLLAMA_AVAILABLE:
+        raise ImportError("ollama is not available. Please install it with: pip install ollama")
     ollama_client = ollama.AsyncClient(host=host, timeout=timeout)
     messages = []
     if system_prompt:
@@ -1011,6 +1019,8 @@ async def ollama_embedding(texts: list[str], embed_model, **kwargs) -> np.ndarra
     """
     Deprecated in favor of `embed`.
     """
+    if not OLLAMA_AVAILABLE:
+        raise ImportError("ollama is not available. Please install it with: pip install ollama")
     embed_text = []
     ollama_client = ollama.Client(**kwargs)
     for text in texts:
@@ -1021,6 +1031,8 @@ async def ollama_embedding(texts: list[str], embed_model, **kwargs) -> np.ndarra
 
 
 async def ollama_embed(texts: list[str], embed_model, **kwargs) -> np.ndarray:
+    if not OLLAMA_AVAILABLE:
+        raise ImportError("ollama is not available. Please install it with: pip install ollama")
     ollama_client = ollama.Client(**kwargs)
     data = ollama_client.embed(model=embed_model, input=texts)
     return data["embeddings"]

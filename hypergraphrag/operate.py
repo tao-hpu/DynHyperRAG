@@ -500,6 +500,9 @@ async def kg_query(
     if cached_response is not None:
         return cached_response
     
+    # Track retrieved hyperedges for dynamic update
+    retrieved_hyperedges_for_update = []
+    
     language = global_config["addon_params"].get(
         "language", PROMPTS["DEFAULT_LANGUAGE"]
     )
@@ -582,15 +585,17 @@ async def kg_query(
     else:
         hl_keywords = ", ".join(hl_keywords)
 
-    # Build context
+    # Build context with efficient retrieval support
     keywords = [ll_keywords, hl_keywords]
-    context = await _build_query_context(
+    context, retrieved_hyperedges_for_update = await _build_query_context(
         keywords,
         knowledge_graph_inst,
         entities_vdb,
         hyperedges_vdb,
         text_chunks_db,
         query_param,
+        global_config=global_config,
+        original_query=query,
     )
 
     if query_param.only_need_context:
@@ -632,6 +637,20 @@ async def kg_query(
             mode=query_param.mode,
         ),
     )
+    
+    # Dynamic weight update (Task 9.1 & 9.2)
+    # Extract feedback and update weights asynchronously (non-blocking)
+    # Use asyncio.create_task to run in background
+    asyncio.create_task(
+        _perform_dynamic_update_async(
+            response,
+            retrieved_hyperedges_for_update,
+            knowledge_graph_inst,
+            global_config,
+            query
+        )
+    )
+    
     return response
 
 
@@ -642,7 +661,27 @@ async def _build_query_context(
     hyperedges_vdb: BaseVectorStorage,
     text_chunks_db: BaseKVStorage[TextChunkSchema],
     query_param: QueryParam,
+    global_config: dict = None,
+    original_query: str = None,
 ):
+    """
+    Build query context with optional efficient retrieval.
+    
+    Args:
+        query: List of [low_level_keywords, high_level_keywords]
+        knowledge_graph_inst: Graph storage instance
+        entities_vdb: Entity vector database
+        hyperedges_vdb: Hyperedge vector database
+        text_chunks_db: Text chunks database
+        query_param: Query parameters
+        global_config: Global configuration (optional, for efficient retrieval)
+        original_query: Original query string (optional, for entity type identification)
+    
+    Returns:
+        Tuple of (context_str, retrieved_hyperedges)
+    """
+    # Track retrieved hyperedges for dynamic update
+    retrieved_hyperedges = []
 
     ll_kewwords, hl_keywrds = query[0], query[1]
     if query_param.mode in ["local", "hybrid"]:
@@ -661,13 +700,17 @@ async def _build_query_context(
                 ll_entities_context,
                 ll_relations_context,
                 ll_text_units_context,
+                ll_hyperedges,
             ) = await _get_node_data(
-                ll_kewwords,
-                knowledge_graph_inst,
-                entities_vdb,
-                text_chunks_db,
-                query_param,
+                query_keywords=ll_kewwords,
+                knowledge_graph_inst=knowledge_graph_inst,
+                entities_vdb=entities_vdb,
+                text_chunks_db=text_chunks_db,
+                query_param=query_param,
+                global_config=global_config,
+                query=original_query,
             )
+            retrieved_hyperedges.extend(ll_hyperedges)
     if query_param.mode in ["global", "hybrid"]:
         if hl_keywrds == "":
             hl_entities_context, hl_relations_context, hl_text_units_context = (
@@ -684,13 +727,17 @@ async def _build_query_context(
                 hl_entities_context,
                 hl_relations_context,
                 hl_text_units_context,
+                hl_hyperedges,
             ) = await _get_edge_data(
                 hl_keywrds,
                 knowledge_graph_inst,
                 hyperedges_vdb,
                 text_chunks_db,
                 query_param,
+                global_config=global_config,
+                query=original_query,
             )
+            retrieved_hyperedges.extend(hl_hyperedges)
             if (
                 hl_entities_context == ""
                 and hl_relations_context == ""
@@ -716,7 +763,8 @@ async def _build_query_context(
             hl_relations_context,
             hl_text_units_context,
         )
-    return f"""
+    
+    context_str = f"""
 -----Entities-----
 ```csv
 {entities_context}
@@ -730,19 +778,40 @@ async def _build_query_context(
 {text_units_context}
 ```
 """
+    
+    return context_str, retrieved_hyperedges
 
 
 async def _get_node_data(
-    query,
+    query_keywords,
     knowledge_graph_inst: BaseGraphStorage,
     entities_vdb: BaseVectorStorage,
     text_chunks_db: BaseKVStorage[TextChunkSchema],
     query_param: QueryParam,
+    global_config: dict = None,
+    query: str = None,
 ):
+    """
+    Get node (entity) data with optional efficient retrieval integration.
+    
+    This function now supports quality-aware ranking for related hyperedges.
+    
+    Args:
+        query_keywords: Query keywords for entity search
+        knowledge_graph_inst: Graph storage instance
+        entities_vdb: Vector database for entities
+        text_chunks_db: Text chunks database
+        query_param: Query parameters
+        global_config: Global configuration (optional, for efficient retrieval)
+        query: Original query string (optional, for ranking)
+    
+    Returns:
+        Tuple of (entities_context, relations_context, text_units_context, retrieved_hyperedges)
+    """
     # get similar entities
-    results = await entities_vdb.query(query, top_k=query_param.top_k)
+    results = await entities_vdb.query(query_keywords, top_k=query_param.top_k)
     if not len(results):
-        return "", "", ""
+        return "", "", "", []
     # get entity information
     node_datas = await asyncio.gather(
         *[knowledge_graph_inst.get_node(r["entity_name"]) for r in results]
@@ -758,7 +827,7 @@ async def _get_node_data(
         {**n, "entity_name": k["entity_name"], "rank": d}
         for k, n, d in zip(results, node_datas, node_degrees)
         if n is not None
-    ]  # what is this text_chunks_db doing.  dont remember it in airvx.  check the diagram.
+    ]
     # get entitytext chunk
     use_text_units = await _find_most_related_text_unit_from_entities(
         node_datas, query_param, text_chunks_db, knowledge_graph_inst
@@ -767,6 +836,32 @@ async def _get_node_data(
     use_relations = await _find_most_related_edges_from_entities(
         node_datas, query_param, knowledge_graph_inst
     )
+    
+    # Apply quality-aware ranking to related hyperedges if enabled
+    if global_config is not None:
+        addon_params = global_config.get("addon_params", {})
+        retrieval_config = addon_params.get("retrieval_config", {})
+        use_efficient_retrieval = retrieval_config.get("entity_filter_enabled", False)
+        lite_config = addon_params.get("lite_config", {})
+        use_lite_mode = lite_config.get("enabled", False)
+        
+        if use_efficient_retrieval and not use_lite_mode:
+            try:
+                from .retrieval import QualityAwareRanker
+                
+                ranker = QualityAwareRanker(retrieval_config)
+                
+                logger.info("[Quality Ranker] Applying quality-aware ranking to related hyperedges")
+                use_relations = await ranker.rank_hyperedges(
+                    query if query else "",
+                    use_relations,
+                    graph=knowledge_graph_inst
+                )
+                
+            except ImportError as e:
+                logger.debug(f"QualityAwareRanker not available: {e}")
+            except Exception as e:
+                logger.error(f"Quality-aware ranking failed for related edges: {e}")
     logger.info(
         f"Local query uses {len(node_datas)} entites, {len(use_relations)} relations, {len(use_text_units)} text units"
     )
@@ -801,7 +896,18 @@ async def _get_node_data(
     for i, t in enumerate(use_text_units):
         text_units_section_list.append([i, t["content"]])
     text_units_context = list_of_list_to_csv(text_units_section_list)
-    return entities_context, relations_context, text_units_context
+    
+    # Prepare hyperedges for dynamic update
+    retrieved_hyperedges = [
+        {
+            "id": e.get("hyperedge_id", e["description"]),
+            "hyperedge": e["description"],
+            "distance": e.get("rank", 0.5)
+        }
+        for e in use_relations
+    ]
+    
+    return entities_context, relations_context, text_units_context, retrieved_hyperedges
 
 
 async def _find_most_related_text_unit_from_entities(
@@ -934,29 +1040,165 @@ async def _get_edge_data(
     hyperedges_vdb: BaseVectorStorage,
     text_chunks_db: BaseKVStorage[TextChunkSchema],
     query_param: QueryParam,
+    global_config: dict = None,
+    query: str = None,
 ):
-    results = await hyperedges_vdb.query(keywords, top_k=query_param.top_k)
+    """
+    Get edge (hyperedge) data with optional efficient retrieval integration.
+    
+    This function now supports:
+    - Entity type filtering (Task 10)
+    - Quality-aware ranking (Task 11)
+    - Lite retriever mode (Task 12)
+    
+    Args:
+        keywords: Query keywords
+        knowledge_graph_inst: Graph storage instance
+        hyperedges_vdb: Vector database for hyperedges
+        text_chunks_db: Text chunks database
+        query_param: Query parameters
+        global_config: Global configuration (optional, for efficient retrieval)
+        query: Original query string (optional, for entity type identification)
+    
+    Returns:
+        Tuple of (entities_context, relations_context, text_units_context, retrieved_hyperedges)
+    """
+    # Check if efficient retrieval is enabled
+    use_efficient_retrieval = False
+    use_lite_mode = False
+    retrieval_config = {}
+    
+    if global_config is not None:
+        addon_params = global_config.get("addon_params", {})
+        retrieval_config = addon_params.get("retrieval_config", {})
+        use_efficient_retrieval = retrieval_config.get("entity_filter_enabled", False)
+        
+        lite_config = addon_params.get("lite_config", {})
+        use_lite_mode = lite_config.get("enabled", False)
+    
+    # Use lite retriever if enabled
+    if use_lite_mode and global_config is not None:
+        try:
+            from .retrieval import LiteRetriever
+            
+            lite_retriever = LiteRetriever(
+                knowledge_graph_inst,
+                hyperedges_vdb,
+                lite_config
+            )
+            
+            logger.info("[Lite Mode] Using LiteRetriever for efficient retrieval")
+            results = await lite_retriever.retrieve(keywords, top_k=query_param.top_k)
+            
+        except ImportError as e:
+            logger.warning(f"Failed to import LiteRetriever: {e}. Falling back to standard retrieval.")
+            results = await hyperedges_vdb.query(keywords, top_k=query_param.top_k)
+        except Exception as e:
+            logger.error(f"LiteRetriever failed: {e}. Falling back to standard retrieval.")
+            results = await hyperedges_vdb.query(keywords, top_k=query_param.top_k)
+    else:
+        # Standard vector retrieval
+        results = await hyperedges_vdb.query(keywords, top_k=query_param.top_k)
 
     if not len(results):
-        return "", "", ""
+        return "", "", "", []
 
+    # Get hyperedge node data
     edge_datas = await asyncio.gather(
         *[knowledge_graph_inst.get_node(r["hyperedge_name"]) for r in results]
     )
 
     if not all([n is not None for n in edge_datas]):
         logger.warning("Some edges are missing, maybe the storage is damaged")
-    # edge_degree = await asyncio.gather(
-    #     *[knowledge_graph_inst.node_degree(r["hyperedge_name"]) for r in results]
-    # )
+    
+    # Combine vector results with node data
     edge_datas = [
         {"hyperedge": k["hyperedge_name"], "rank": k["distance"], **v}
         for k, v in zip(results, edge_datas)
         if v is not None
     ]
-    edge_datas = sorted(
-        edge_datas, key=lambda x: (x["rank"], x["weight"]), reverse=True
-    )
+    
+    # Apply entity type filtering if enabled
+    if use_efficient_retrieval and query is not None and global_config is not None:
+        try:
+            from .retrieval import EntityTypeFilter
+            
+            entity_filter = EntityTypeFilter(
+                knowledge_graph_inst,
+                retrieval_config,
+                llm_model_func=global_config.get("llm_model_func")
+            )
+            
+            # Identify relevant entity types from query
+            relevant_types = await entity_filter.identify_relevant_types(query)
+            logger.info(f"[Entity Filter] Identified relevant types: {relevant_types}")
+            
+            # Filter hyperedges by entity type
+            hyperedge_ids = [e["hyperedge"] for e in edge_datas]
+            filtered_ids = await entity_filter.filter_hyperedges_by_type(
+                hyperedge_ids,
+                relevant_types
+            )
+            
+            # Keep only filtered hyperedges
+            original_count = len(edge_datas)
+            edge_datas = [e for e in edge_datas if e["hyperedge"] in filtered_ids]
+            filtered_count = len(edge_datas)
+            
+            logger.info(
+                f"[Entity Filter] Filtered {original_count} → {filtered_count} hyperedges "
+                f"({(1 - filtered_count/original_count)*100:.1f}% reduction)"
+            )
+            
+            # If too few results after filtering, fall back to unfiltered
+            if filtered_count < max(3, query_param.top_k // 2):
+                logger.warning(
+                    f"[Entity Filter] Too few results after filtering ({filtered_count}). "
+                    "Using unfiltered results."
+                )
+                edge_datas = [
+                    {"hyperedge": k["hyperedge_name"], "rank": k["distance"], **v}
+                    for k, v in zip(results, edge_datas)
+                    if v is not None
+                ]
+                
+        except ImportError as e:
+            logger.warning(f"Failed to import EntityTypeFilter: {e}. Skipping entity filtering.")
+        except Exception as e:
+            logger.error(f"Entity type filtering failed: {e}. Continuing without filtering.")
+    
+    # Apply quality-aware ranking if enabled and not in lite mode
+    if use_efficient_retrieval and not use_lite_mode and global_config is not None:
+        try:
+            from .retrieval import QualityAwareRanker
+            
+            ranker = QualityAwareRanker(retrieval_config)
+            
+            logger.info("[Quality Ranker] Applying quality-aware ranking")
+            edge_datas = await ranker.rank_hyperedges(
+                query if query else keywords,
+                edge_datas,
+                graph=knowledge_graph_inst
+            )
+            
+        except ImportError as e:
+            logger.warning(f"Failed to import QualityAwareRanker: {e}. Using standard ranking.")
+            # Fall back to standard ranking
+            edge_datas = sorted(
+                edge_datas, key=lambda x: (x["rank"], x["weight"]), reverse=True
+            )
+        except Exception as e:
+            logger.error(f"Quality-aware ranking failed: {e}. Using standard ranking.")
+            edge_datas = sorted(
+                edge_datas, key=lambda x: (x["rank"], x["weight"]), reverse=True
+            )
+    else:
+        # Standard ranking by similarity and weight
+        edge_datas = sorted(
+            edge_datas, key=lambda x: (x["rank"], x["weight"]), reverse=True
+        )
+    
+    # Truncate by token size
     edge_datas = truncate_list_by_token_size(
         edge_datas,
         key=lambda x: x["hyperedge"],
@@ -1012,7 +1254,18 @@ async def _get_edge_data(
     for i, t in enumerate(use_text_units):
         text_units_section_list.append([i, t["content"]])
     text_units_context = list_of_list_to_csv(text_units_section_list)
-    return entities_context, relations_context, text_units_context
+    
+    # Prepare hyperedges for dynamic update
+    retrieved_hyperedges = [
+        {
+            "id": e["hyperedge"],
+            "hyperedge": e["hyperedge"],
+            "distance": e.get("rank", 0.5)
+        }
+        for e in edge_datas
+    ]
+    
+    return entities_context, relations_context, text_units_context, retrieved_hyperedges
 
 
 async def _find_most_related_entities_from_relationships(
@@ -1122,3 +1375,122 @@ def combine_contexts(entities, relationships, sources):
     combined_sources = process_combine_contexts(hl_sources, ll_sources)
 
     return combined_entities, combined_relationships, combined_sources
+
+
+
+async def _perform_dynamic_update_async(
+    answer: str,
+    retrieved_hyperedges: list[dict],
+    knowledge_graph_inst: BaseGraphStorage,
+    global_config: dict,
+    query: str = None
+):
+    """
+    Perform dynamic weight update asynchronously after query completion.
+    
+    This function runs in the background without blocking the query response.
+    It implements Task 9.2: Asynchronous weight update with proper error handling
+    and race condition prevention.
+    
+    Features:
+    - Non-blocking execution using asyncio.create_task()
+    - Comprehensive error handling
+    - Race condition prevention through atomic operations
+    - Detailed logging for monitoring
+    
+    Args:
+        answer: Generated answer text
+        retrieved_hyperedges: List of retrieved hyperedge dictionaries
+        knowledge_graph_inst: Graph storage instance
+        global_config: Global configuration dictionary
+        query: Original query (optional, for logging)
+    """
+    # Check if dynamic update is enabled
+    dynamic_config = global_config.get("addon_params", {}).get("dynamic_config", {})
+    if not dynamic_config.get("enabled", False):
+        logger.debug("Dynamic update is disabled, skipping weight update")
+        return
+    
+    if not retrieved_hyperedges:
+        logger.debug("No hyperedges retrieved, skipping weight update")
+        return
+    
+    try:
+        # Import dynamic modules
+        from .dynamic import FeedbackExtractor, WeightUpdater
+        
+        # Get embedding function
+        embedding_func = global_config.get("embedding_func")
+        if embedding_func is None:
+            logger.warning("Embedding function not available, skipping dynamic update")
+            return
+        
+        # Initialize feedback extractor
+        feedback_config = {
+            "method": dynamic_config.get("feedback_method", "embedding"),
+            "similarity_threshold": dynamic_config.get("feedback_threshold", 0.7),
+            "citation_threshold": 0.8,
+        }
+        feedback_extractor = FeedbackExtractor(embedding_func, feedback_config)
+        
+        # Initialize weight updater
+        weight_config = {
+            "strategy": dynamic_config.get("strategy", "ema"),
+            "update_alpha": dynamic_config.get("update_alpha", 0.1),
+            "decay_factor": dynamic_config.get("decay_factor", 0.99),
+        }
+        weight_updater = WeightUpdater(knowledge_graph_inst, weight_config)
+        
+        # Extract feedback signals
+        logger.debug(f"[Async] Extracting feedback for {len(retrieved_hyperedges)} hyperedges")
+        feedback_signals = await feedback_extractor.extract_feedback(
+            answer,
+            retrieved_hyperedges,
+            metadata={"query": query} if query else None
+        )
+        
+        if not feedback_signals:
+            logger.debug("[Async] No feedback signals extracted")
+            return
+        
+        # Update weights with race condition handling
+        # The WeightUpdater uses atomic upsert_node operations to prevent race conditions
+        logger.info(f"[Async] Updating weights for {len(feedback_signals)} hyperedges")
+        update_count = 0
+        failed_updates = []
+        
+        for he_id, feedback in feedback_signals.items():
+            try:
+                # Each update is atomic at the storage level
+                new_weight = await weight_updater.update_weights(
+                    he_id,
+                    feedback,
+                    metadata={"query": query} if query else None
+                )
+                update_count += 1
+                logger.debug(
+                    f"[Async] Updated {he_id}: feedback={feedback:.3f}, new_weight={new_weight:.3f}"
+                )
+            except Exception as e:
+                logger.error(f"[Async] Failed to update weight for {he_id}: {e}")
+                failed_updates.append(he_id)
+        
+        # Log summary
+        logger.info(
+            f"[Async] Dynamic update completed: {update_count}/{len(feedback_signals)} "
+            f"hyperedges updated successfully"
+        )
+        
+        if failed_updates:
+            logger.warning(
+                f"[Async] {len(failed_updates)} updates failed: {failed_updates[:5]}"
+                + ("..." if len(failed_updates) > 5 else "")
+            )
+        
+    except ImportError as e:
+        logger.error(f"[Async] Failed to import dynamic modules: {e}")
+    except Exception as e:
+        logger.error(f"[Async] Dynamic update failed: {e}", exc_info=True)
+    finally:
+        # Ensure cleanup even if errors occur
+        logger.debug("[Async] Dynamic update task finished")

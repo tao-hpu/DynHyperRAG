@@ -232,24 +232,41 @@ HyperGraphRAG/
 ├── script_query.py          # Enhanced query script
 │
 ├── hypergraphrag/           # Core library
+│   ├── base.py              # Base classes and interfaces
+│   ├── hypergraphrag.py     # Main HyperGraphRAG implementation
+│   ├── operate.py           # Core operations (extract, query)
+│   ├── llm.py               # LLM interface
+│   ├── storage.py           # Storage implementations
+│   ├── prompt.py            # Prompt templates
+│   ├── utils.py             # Utility functions
+│   │
 │   ├── quality/             # 🆕 Quality assessment module (DynHyperRAG)
+│   │   ├── __init__.py      # Module exports
 │   │   ├── scorer.py        # Quality scoring algorithm
 │   │   ├── features.py      # Graph structure feature extraction
 │   │   ├── coherence.py     # Hyperedge coherence metric
 │   │   └── analyzer.py      # Feature importance analysis (SHAP)
+│   │
 │   ├── dynamic/             # 🆕 Dynamic update module (DynHyperRAG)
+│   │   ├── __init__.py      # Module exports
 │   │   ├── weight_updater.py    # Weight update mechanism
 │   │   ├── feedback_extractor.py # Feedback signal extraction
 │   │   └── refiner.py       # Hyperedge refinement
+│   │
 │   ├── retrieval/           # 🆕 Efficient retrieval module (DynHyperRAG)
+│   │   ├── __init__.py      # Module exports
 │   │   ├── entity_filter.py # Entity type filtering
 │   │   ├── quality_ranker.py # Quality-aware ranking
 │   │   └── lite_retriever.py # Lightweight retriever
+│   │
 │   ├── evaluation/          # 🆕 Evaluation framework (DynHyperRAG)
+│   │   ├── __init__.py      # Module exports
 │   │   ├── metrics.py       # Evaluation metrics
 │   │   ├── baselines.py     # Baseline methods
 │   │   └── pipeline.py      # Experiment pipeline
+│   │
 │   └── data/                # 🆕 Data processing (DynHyperRAG)
+│       ├── __init__.py      # Module exports
 │       ├── cail2019_loader.py   # CAIL2019 legal dataset
 │       ├── academic_loader.py   # PubMed/AMiner academic dataset
 │       └── annotator.py     # Annotation interface

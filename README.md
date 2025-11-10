@@ -468,10 +468,16 @@ If you use this fork or DynHyperRAG in your research, please cite:
 
 ## 📧 Contact
 
-**Core Algorithm Developer**: Hao Liu (HaoLiu923)
+**Core Algorithm Developer**: [Hao Liu](https://haoliu923.github.io) (HaoLiu923)
+- Homepage: [haoliu923.github.io](https://haoliu923.github.io)
+- ORCID: [0009-0001-9948-8409](https://orcid.org/0009-0001-9948-8409)
+- Email: 405685255@qq.com
+
 **Programming & Code Review**: [Tao An](https://tao-hpu.github.io)
+- Homepage: [tao-hpu.github.io](https://tao-hpu.github.io)
+- ORCID: [0009-0006-2933-0320](https://orcid.org/0009-0006-2933-0320)
+
 **Location**: Beijing
-**ORCID**: [0009-0006-2933-0320](https://orcid.org/0009-0006-2933-0320)
 
 For questions about this fork: Open an issue on [GitHub](https://github.com/tao-hpu/HyperGraphRAG/issues)
 
@@ -523,9 +529,8 @@ This fork maintains the same license as the original repository. Please refer to
 - **Development Repository**: [tao-hpu/HyperGraphRAG](https://github.com/tao-hpu/HyperGraphRAG)
 - **Thesis Overview**: [docs/THESIS_OVERVIEW.md](docs/THESIS_OVERVIEW.md)
 - **Research Specs**: [.kiro/specs/dynhyperrag-quality-aware/](.kiro/specs/dynhyperrag-quality-aware/)
-- **Core Algorithm**: Hao Liu (HaoLiu923)
-- **Programming & Review**: [Tao An](https://tao-hpu.github.io)
-- **ORCID**: [0009-0006-2933-0320](https://orcid.org/0009-0006-2933-0320)
+- **Core Algorithm**: [Hao Liu](https://haoliu923.github.io) | ORCID: [0009-0001-9948-8409](https://orcid.org/0009-0001-9948-8409)
+- **Programming & Review**: [Tao An](https://tao-hpu.github.io) | ORCID: [0009-0006-2933-0320](https://orcid.org/0009-0006-2933-0320)
 
 ### Related Projects
 - [cognitive-workspace](https://github.com/tao-hpu/cognitive-workspace) - Active memory management for LLMs

@@ -19,23 +19,32 @@ jobs:
         env:
           FRIEND_TOKEN: ${{ secrets.LIUHAO }}
         run: |
-          # 配置朋友的身份
-          git config user.name "HaoLiu923"
-          git config user.email "405685255@qq.com"
-          
-          # 配置 Git 使用 token 认证
-          git config --global credential.helper store
-          echo "https://HaoLiu923:${FRIEND_TOKEN}@github.com" > ~/.git-credentials
-          
           # 删除 .github 目录（不同步工作流）
           rm -rf .github
           
-          # 提交删除操作
+          # 配置 Git
+          git config --global user.name "HaoLiu923"
+          git config --global user.email "405685255@qq.com"
+          
+          # 克隆朋友的 repo（如果为空会失败，所以先初始化）
+          git clone https://${FRIEND_TOKEN}@github.com/HaoLiu923/DynHyperRAG.git target || {
+            # 如果 repo 为空，创建初始提交
+            mkdir target
+            cd target
+            git init
+            git remote add origin https://${FRIEND_TOKEN}@github.com/HaoLiu923/DynHyperRAG.git
+            cd ..
+          }
+          
+          # 同步代码（排除 .git 目录）
+          rsync -av --delete --exclude='.git' ./ target/
+          
+          # 提交并推送
+          cd target
           git add -A
-          git commit -m "Sync from upstream $(date +'%Y-%m-%d %H:%M:%S')" || true
-          
-          # 添加朋友的 repo 作为 remote
-          git remote add friend https://github.com/HaoLiu923/DynHyperRAG.git
-          
-          # 强制推送到朋友的 repo（覆盖式同步）
-          git push -f friend main:main
+          if ! git diff --staged --quiet; then
+            git commit -m "Sync from upstream $(date +'%Y-%m-%d %H:%M:%S')"
+            git push -f origin main
+          else
+            echo "No changes to sync"
+          fi

@@ -23,11 +23,19 @@ jobs:
           git config user.name "HaoLiu923"
           git config user.email "405685255@qq.com"
           
+          # 配置 Git 使用 token 认证
+          git config --global credential.helper store
+          echo "https://HaoLiu923:${FRIEND_TOKEN}@github.com" > ~/.git-credentials
+          
           # 删除 .github 目录（不同步工作流）
           rm -rf .github
           
+          # 提交删除操作
+          git add -A
+          git commit -m "Sync from upstream $(date +'%Y-%m-%d %H:%M:%S')" || true
+          
           # 添加朋友的 repo 作为 remote
-          git remote add friend https://HaoLiu923:${FRIEND_TOKEN}@github.com/HaoLiu923/DynHyperRAG.git
+          git remote add friend https://github.com/HaoLiu923/DynHyperRAG.git
           
           # 强制推送到朋友的 repo（覆盖式同步）
           git push -f friend main:main

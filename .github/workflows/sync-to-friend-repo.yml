@@ -18,7 +18,7 @@ jobs:
       - name: Checkout friend's repo
         uses: actions/checkout@v4
         with:
-          repository: friend-username/friend-repo
+          repository: HaoLiu923/DynHyperRAG
           token: ${{ secrets.FRIEND_REPO_TOKEN }}
           path: target
           
@@ -26,8 +26,8 @@ jobs:
         run: |
           # 配置朋友的身份
           cd target
-          git config user.name "Friend Name"
-          git config user.email "friend@example.com"
+          git config user.name "HaoLiu923"
+          git config user.email "405685255@qq.com"
           
           # 同步代码（排除 .git 和 .github 目录）
           rsync -av --delete \

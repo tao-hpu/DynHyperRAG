@@ -404,9 +404,11 @@ This is a research fork. Contributions are welcome!
 - [ ] Quality assessment module (Week 1-4)
 - [ ] Dynamic weight update module (Week 5-7)
 - [ ] Efficient retrieval module (Week 8-10)
-- [ ] CAIL2019 legal dataset preparation (Week 11-12)
-- [ ] PubMed/AMiner academic dataset preparation (Week 11-12)
-- [ ] Evaluation framework and experiments (Week 13-16)
+- [x] CAIL2019 legal dataset preparation (Week 11-12) ✅
+- [x] PubMed/AMiner academic dataset preparation (Week 11-12) ✅
+- [x] Evaluation framework (metrics, baselines, pipeline) (Week 13-14) ✅
+- [x] Ablation studies framework (Week 15-16) ✅
+- [ ] Full experiments and result generation (Week 15-16)
 - [ ] Thesis writing (Week 17-18)
 
 ### Completed Features
@@ -414,6 +416,12 @@ This is a research fork. Contributions are welcome!
 - [x] Comprehensive testing infrastructure ✅
 - [x] Production-ready configuration system ✅
 - [x] Web UI with interactive graph exploration ✅
+- [x] CAIL2019 legal dataset loader and processor ✅
+- [x] Academic dataset (PubMed/AMiner) loader ✅
+- [x] Evaluation metrics (MRR, Recall@K, Precision@K, F1@K, NDCG@K) ✅
+- [x] Baseline methods (BM25, TF-IDF, Dense Retrieval, GraphRAG) ✅
+- [x] Experiment pipeline with statistical testing ✅
+- [x] Ablation studies framework ✅
 
 ### Future Work
 - [ ] Optimization for large-scale documents

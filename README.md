@@ -1,6 +1,6 @@
 # HyperGraphRAG - Enhanced Fork & DynHyperRAG Research
 
-> 🔬 **Research Fork by [Tao An](https://tao-hpu.github.io)** | [Original Repository](https://github.com/LHRLAB/HyperGraphRAG)
+> 🔬 **Research Project: DynHyperRAG** | [Original Repository](https://github.com/LHRLAB/HyperGraphRAG)
 
 This is an enhanced fork of the official **HyperGraphRAG** implementation, serving as the foundation for **DynHyperRAG** - a novel quality-aware dynamic hypergraph RAG system for doctoral research.
 

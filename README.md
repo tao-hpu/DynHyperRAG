@@ -84,6 +84,10 @@ DynHyperRAG extends static HyperGraphRAG with three major innovations:
 3. **📚 Comprehensive Documentation**
    - [Quick Start Guide](docs/QUICKSTART.md) - Get started in 5 minutes (中文)
    - [Setup Guide](docs/SETUP.md) - Complete setup instructions (中文)
+   - [API Reference](docs/API_REFERENCE.md) - Complete API documentation for DynHyperRAG modules
+   - [User Guide](docs/USER_GUIDE.md) - Step-by-step tutorials and examples
+   - [Configuration Guide](docs/CONFIGURATION_GUIDE.md) - Detailed configuration options
+   - [FAQ](docs/FAQ.md) - Frequently asked questions
    - [Performance Analysis](docs/performance-analysis.md) - HyperGraphRAG advantages & benchmarks
    - [Troubleshooting Guide](docs/troubleshooting.md) - Common issues & solutions
 

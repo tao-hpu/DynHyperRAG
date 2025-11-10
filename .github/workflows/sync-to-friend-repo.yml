@@ -1,0 +1,45 @@
+name: Sync Code to Friend Repo
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout your repo
+        uses: actions/checkout@v4
+        with:
+          path: source
+          
+      - name: Checkout friend's repo
+        uses: actions/checkout@v4
+        with:
+          repository: friend-username/friend-repo
+          token: ${{ secrets.FRIEND_REPO_TOKEN }}
+          path: target
+          
+      - name: Sync and commit
+        run: |
+          # 配置朋友的身份
+          cd target
+          git config user.name "Friend Name"
+          git config user.email "friend@example.com"
+          
+          # 同步代码（排除 .git 和 .github 目录）
+          rsync -av --delete \
+            --exclude='.git' \
+            --exclude='.github' \
+            ../source/ ./
+          
+          # 提交更改
+          git add .
+          if ! git diff --staged --quiet; then
+            git commit -m "Update from upstream $(date +'%Y-%m-%d %H:%M:%S')"
+            git push origin main
+          else
+            echo "No changes to sync"
+          fi

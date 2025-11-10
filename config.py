@@ -102,11 +102,11 @@ class Config:
     
     def _load_entity_taxonomy(self) -> dict:
         """Load entity taxonomy for different domains"""
-        # Default taxonomies - aligned with CAIL2019Loader.ENTITY_TYPES
+        # Default taxonomies - aligned with CAIL2019Loader.ENTITY_TYPES and AcademicLoader.ENTITY_TYPES
         default_taxonomy = {
             "medical": ["disease", "symptom", "treatment", "medication", "procedure", "anatomy"],
             "legal": ["law", "article", "court", "party", "crime", "penalty"],  # CAIL2019 legal domain
-            "academic": ["paper", "author", "institution", "keyword", "conference"],
+            "academic": ["paper", "author", "institution", "keyword", "conference", "journal"],  # Academic domain
         }
         
         # Allow custom taxonomy from environment (comma-separated)

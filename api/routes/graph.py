@@ -74,19 +74,26 @@ async def get_node(
 async def get_edges(
     limit: int = Query(100, ge=1, le=10000, description="Maximum number of edges to return"),
     offset: int = Query(0, ge=0, description="Number of edges to skip"),
-    min_weight: Optional[float] = Query(None, ge=0.0, le=1.0, description="Minimum edge weight")
+    min_weight: Optional[float] = Query(None, ge=0.0, le=1.0, description="Minimum edge weight"),
+    node_limit: int = Query(500, ge=1, le=10000, description="Limit for available nodes")
 ):
     """
     Get hyperedges with pagination and filtering
     
     Returns a list of edges (including hyperedges) from the graph.
+    Only returns edges between nodes that are in the first node_limit nodes.
     
     - **limit**: Maximum number of edges (1-10000)
     - **offset**: Pagination offset
     - **min_weight**: Optional minimum weight threshold (0.0-1.0)
+    - **node_limit**: Limit for available nodes to ensure edge consistency
     """
     try:
-        edges = await graph_service.get_edges(limit, offset, min_weight)
+        # Get available nodes (first node_limit nodes)
+        available_nodes_list = await graph_service.get_nodes(node_limit, 0)
+        available_nodes = {node.id for node in available_nodes_list}
+        
+        edges = await graph_service.get_edges(limit, offset, min_weight, available_nodes)
         return edges
     except Exception as e:
         logger.error(f"Error getting edges: {e}")

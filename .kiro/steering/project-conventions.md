@@ -147,3 +147,15 @@ git commit -m "feat: add hypergraph bipartite visualization"
 git commit -m "fix: resolve empty entity type issue"
 git commit -m "docs: add visualization strategies guide"
 ```
+
+### Git 操作重要规则
+
+**❌ 绝对禁止**：
+- 永远不要使用 `git add -f .kiro/` 强制添加 .kiro 目录
+- .kiro 目录包含 IDE 配置，应保持在 .gitignore 中
+- 不要强制提交被 .gitignore 忽略的文件
+
+**✅ 正确做法**：
+- 只提交项目代码和配置文件
+- 遵守 .gitignore 规则
+- 如需修改 .gitignore，先讨论后决定

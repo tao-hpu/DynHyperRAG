@@ -38,8 +38,16 @@ class GraphService {
     limit?: number;
     offset?: number;
     minWeight?: number;
+    nodeLimit?: number;
   }): Promise<Edge[]> {
-    const response = await api.get<Edge[]>('/graph/edges', { params });
+    const response = await api.get<Edge[]>('/graph/edges', { 
+      params: {
+        limit: params?.limit,
+        offset: params?.offset,
+        min_weight: params?.minWeight,
+        node_limit: params?.nodeLimit,
+      }
+    });
     return response.data;
   }
 
@@ -128,9 +136,11 @@ class GraphService {
     entityType?: string;
     minWeight?: number;
   }): Promise<GraphData> {
+    const nodeLimit = params?.nodeLimit || 1000;
+    
     const [nodes, edges] = await Promise.all([
       this.getNodes({
-        limit: params?.nodeLimit || 1000,
+        limit: nodeLimit,
         offset: 0,
         entityType: params?.entityType,
       }),
@@ -138,6 +148,7 @@ class GraphService {
         limit: params?.edgeLimit || 1000,
         offset: 0,
         minWeight: params?.minWeight,
+        nodeLimit: nodeLimit, // 确保边只连接已获取的节点
       }),
     ]);
 

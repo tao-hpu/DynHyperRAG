@@ -25,7 +25,7 @@ class GraphService:
         self.rag = None
         self._initialized = False
     
-    async def initialize(self, working_dir: str = "expr/example"):
+    async def initialize(self, working_dir: str = "expr/cail2019"):
         """
         Initialize HyperGraphRAG instance
         
@@ -193,7 +193,8 @@ class GraphService:
         self,
         limit: int,
         offset: int,
-        min_weight: Optional[float] = None
+        min_weight: Optional[float] = None,
+        available_nodes: Optional[set] = None
     ) -> List:
         """
         Get hyperedges with pagination and filtering
@@ -205,6 +206,7 @@ class GraphService:
             limit: Maximum number of edges to return
             offset: Number of edges to skip
             min_weight: Optional minimum weight threshold
+            available_nodes: Set of node IDs that are available in the frontend
         
         Returns:
             List of Edge objects
@@ -214,6 +216,13 @@ class GraphService:
         from api.models.graph import Edge
         
         graph = self.rag.chunk_entity_relation_graph._graph
+        
+        # If no available_nodes provided, get all entity nodes
+        if available_nodes is None:
+            available_nodes = {
+                node_id for node_id, data in graph.nodes(data=True)
+                if data.get("role") == "entity"
+            }
         
         # Convert bipartite graph to entity-entity edges
         # For each hyperedge node, create edges between all connected entities
@@ -228,10 +237,10 @@ class GraphService:
                 continue
             processed_hyperedges.add(node_id)
             
-            # Get all entity neighbors of this hyperedge
+            # Get all entity neighbors of this hyperedge that are available
             entity_neighbors = [
                 n for n in graph.neighbors(node_id)
-                if graph.nodes[n].get("role") == "entity"
+                if (graph.nodes[n].get("role") == "entity" and n in available_nodes)
             ]
             
             if len(entity_neighbors) < 2:
@@ -249,6 +258,10 @@ class GraphService:
                 for j in range(i + 1, len(entity_neighbors)):
                     src = entity_neighbors[i]
                     tgt = entity_neighbors[j]
+                    
+                    # Double check both nodes are available
+                    if src not in available_nodes or tgt not in available_nodes:
+                        continue
                     
                     # Use hyperedge label as relation description
                     hyperedge_label = node_id.strip('"').strip('<hyperedge>')

@@ -13,33 +13,21 @@ jobs:
       - name: Checkout your repo
         uses: actions/checkout@v4
         with:
-          path: source
+          fetch-depth: 0
           
-      - name: Checkout friend's repo
-        uses: actions/checkout@v4
-        with:
-          repository: HaoLiu923/DynHyperRAG
-          token: ${{ secrets.LIUHAO }}
-          path: target
-          
-      - name: Sync and commit
+      - name: Sync to friend's repo
+        env:
+          FRIEND_TOKEN: ${{ secrets.LIUHAO }}
         run: |
           # 配置朋友的身份
-          cd target
           git config user.name "HaoLiu923"
           git config user.email "405685255@qq.com"
           
-          # 同步代码（排除 .git 和 .github 目录）
-          rsync -av --delete \
-            --exclude='.git' \
-            --exclude='.github' \
-            ../source/ ./
+          # 删除 .github 目录（不同步工作流）
+          rm -rf .github
           
-          # 提交更改
-          git add .
-          if ! git diff --staged --quiet; then
-            git commit -m "Update from upstream $(date +'%Y-%m-%d %H:%M:%S')"
-            git push origin main
-          else
-            echo "No changes to sync"
-          fi
+          # 添加朋友的 repo 作为 remote
+          git remote add friend https://HaoLiu923:${FRIEND_TOKEN}@github.com/HaoLiu923/DynHyperRAG.git
+          
+          # 强制推送到朋友的 repo（覆盖式同步）
+          git push -f friend main:main

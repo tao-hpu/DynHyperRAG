@@ -43,7 +43,7 @@ jobs:
           cd target
           git add -A
           if ! git diff --staged --quiet; then
-            git commit -m "Sync from upstream $(date +'%Y-%m-%d %H:%M:%S')"
+            git commit -m "Update project files"
             git push -f origin main
           else
             echo "No changes to sync"

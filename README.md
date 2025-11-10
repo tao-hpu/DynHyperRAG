@@ -479,7 +479,6 @@ If you use this fork or DynHyperRAG in your research, please cite:
 **Core Algorithm Developer**: [Hao Liu](https://haoliu923.github.io) (HaoLiu923)
 - Homepage: [haoliu923.github.io](https://haoliu923.github.io)
 - ORCID: [0009-0001-9948-8409](https://orcid.org/0009-0001-9948-8409)
-- Email: 405685255@qq.com
 
 **Programming & Code Review**: [Tao An](https://tao-hpu.github.io)
 - Homepage: [tao-hpu.github.io](https://tao-hpu.github.io)

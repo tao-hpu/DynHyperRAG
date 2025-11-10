@@ -443,24 +443,24 @@ If you use this fork or DynHyperRAG in your research, please cite:
 
 ### DynHyperRAG (This Research)
 ```bibtex
-@phdthesis{an2025dynhyperrag,
+@phdthesis{liu2025dynhyperrag,
       title={DynHyperRAG: Quality-Aware Dynamic Hypergraph for Efficient Retrieval-Augmented Generation},
-      author={Tao An},
+      author={Hao Liu and Tao An},
       year={2025},
       school={[University Name]},
-      note={PhD Thesis, Expected June 2025},
-      url={https://github.com/tao-hpu/HyperGraphRAG}
+      note={PhD Thesis, Expected June 2025. Core algorithm by Hao Liu, programming and code review by Tao An},
+      url={https://github.com/HaoLiu923/DynHyperRAG}
 }
 ```
 
 ### This Enhanced Fork
 ```bibtex
-@misc{an2025hypergraphrag-enhanced,
+@misc{liu2025hypergraphrag-enhanced,
       title={HyperGraphRAG: Enhanced Implementation with Production Features},
-      author={Tao An},
+      author={Hao Liu and Tao An},
       year={2025},
-      url={https://github.com/tao-hpu/HyperGraphRAG},
-      note={Enhanced fork with configuration system, visualization, and DynHyperRAG research implementation}
+      url={https://github.com/HaoLiu923/DynHyperRAG},
+      note={Enhanced fork with configuration system, visualization, and DynHyperRAG research implementation. Core algorithm by Hao Liu, programming and code review by Tao An}
 }
 ```
 
@@ -468,7 +468,8 @@ If you use this fork or DynHyperRAG in your research, please cite:
 
 ## 📧 Contact
 
-**Fork Maintainer**: [Tao An](https://tao-hpu.github.io)
+**Core Algorithm Developer**: Hao Liu (HaoLiu923)
+**Programming & Code Review**: [Tao An](https://tao-hpu.github.io)
 **Location**: Beijing
 **ORCID**: [0009-0006-2933-0320](https://orcid.org/0009-0006-2933-0320)
 
@@ -518,10 +519,12 @@ This fork maintains the same license as the original repository. Please refer to
 - **Original Author**: [Haoran Luo](mailto:haoran.luo@ieee.org)
 
 ### This Fork & DynHyperRAG Research
-- **Fork Repository**: [tao-hpu/HyperGraphRAG](https://github.com/tao-hpu/HyperGraphRAG)
+- **Fork Repository**: [HaoLiu923/DynHyperRAG](https://github.com/HaoLiu923/DynHyperRAG)
+- **Development Repository**: [tao-hpu/HyperGraphRAG](https://github.com/tao-hpu/HyperGraphRAG)
 - **Thesis Overview**: [docs/THESIS_OVERVIEW.md](docs/THESIS_OVERVIEW.md)
 - **Research Specs**: [.kiro/specs/dynhyperrag-quality-aware/](.kiro/specs/dynhyperrag-quality-aware/)
-- **Maintainer Homepage**: [tao-hpu.github.io](https://tao-hpu.github.io)
+- **Core Algorithm**: Hao Liu (HaoLiu923)
+- **Programming & Review**: [Tao An](https://tao-hpu.github.io)
 - **ORCID**: [0009-0006-2933-0320](https://orcid.org/0009-0006-2933-0320)
 
 ### Related Projects

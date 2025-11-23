@@ -376,10 +376,8 @@ async def extract_entities(
         now_ticks = PROMPTS["process_tickers"][
             already_processed % len(PROMPTS["process_tickers"])
         ]
-        print(
-            f"{now_ticks} Processed {already_processed} chunks, {already_entities} entities(duplicated), {already_relations} relations(duplicated)\r",
-            end="",
-            flush=True,
+        logger.debug(
+            f"{now_ticks} Processed {already_processed} chunks, {already_entities} entities(duplicated), {already_relations} relations(duplicated)"
         )
         return dict(maybe_nodes), dict(maybe_edges)
 
@@ -543,8 +541,7 @@ async def kg_query(
 
     final_result = await use_model_func(hint_prompt)
 
-    logger.info("kw_prompt result:")
-    print(final_result)
+    logger.info(f"kw_prompt result: {final_result}")
     hl_keywords, ll_keywords = [], []
     try:
         records = split_string_by_multi_markers(
@@ -567,7 +564,7 @@ async def kg_query(
                 continue
     # Handle parsing error
     except json.JSONDecodeError as e:
-        print(f"JSON parsing error: {e} {final_result}")
+        logger.error(f"JSON parsing error: {e} {final_result}")
         return PROMPTS["fail_response"]
 
     # Handdle keywords missing

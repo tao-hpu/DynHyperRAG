@@ -1,5 +1,10 @@
 # HyperGraphRAG - Enhanced Fork & DynHyperRAG Research
 
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 > 🔬 **Research Project: DynHyperRAG** | [Original Repository](https://github.com/LHRLAB/HyperGraphRAG)
 
 This is an enhanced fork of the official **HyperGraphRAG** implementation, serving as the foundation for **DynHyperRAG** - a novel quality-aware dynamic hypergraph RAG system for doctoral research.
@@ -401,9 +406,9 @@ Full analysis: [docs/performance-analysis.md](docs/performance-analysis.md)
 This is a research fork. Contributions are welcome!
 
 ### Current Research Focus (DynHyperRAG)
-- [ ] Quality assessment module (Week 1-4)
-- [ ] Dynamic weight update module (Week 5-7)
-- [ ] Efficient retrieval module (Week 8-10)
+- [x] Quality assessment module (Week 1-4) ✅
+- [x] Dynamic weight update module (Week 5-7) ✅
+- [x] Efficient retrieval module (Week 8-10) ✅
 - [x] CAIL2019 legal dataset preparation (Week 11-12) ✅
 - [x] PubMed/AMiner academic dataset preparation (Week 11-12) ✅
 - [x] Evaluation framework (metrics, baselines, pipeline) (Week 13-14) ✅

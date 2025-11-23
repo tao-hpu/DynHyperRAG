@@ -1,35 +1,40 @@
-torch>=2.0.0
-accelerate
-aioboto3
-aiohttp
+torch>=2.0.0,<3.0.0
+accelerate>=0.25.0
+aioboto3>=12.0.0
+aiohttp>=3.9.0
 
 # database packages
-graspologic
-hnswlib
-nano-vectordb
-neo4j
-networkx
-ollama
-openai
-oracledb
-pymilvus
-pymongo
-pymysql
-pyvis
+graspologic>=3.3.0
+hnswlib>=0.8.0
+nano-vectordb>=0.0.5
+neo4j>=5.14.0
+networkx>=3.2.0
+ollama>=0.1.0
+openai>=1.6.0
+oracledb>=2.0.0
+pymilvus>=2.3.0
+pymongo>=4.6.0
+pymysql>=1.1.0
+pyvis>=0.3.2
 # lmdeploy[all]
-sqlalchemy
-tenacity
+sqlalchemy>=2.0.0
+tenacity>=8.2.0
 
 
 # LLM packages
-tiktoken
-transformers
-xxhash
-jsonlines
-nltk
-PyPDF2
+tiktoken>=0.5.0
+transformers>=4.36.0
+xxhash>=3.4.0
+jsonlines>=4.0.0
+nltk>=3.8.0
+PyPDF2>=3.0.0
 
 # API packages
-fastapi>=0.104.0
+fastapi>=0.104.0,<1.0.0
 uvicorn[standard]>=0.24.0
-pydantic>=2.0.0
+pydantic>=2.0.0,<3.0.0
+
+# Quality & Testing
+numpy>=1.24.0,<2.0.0
+scikit-learn>=1.3.0
+tqdm>=4.66.0

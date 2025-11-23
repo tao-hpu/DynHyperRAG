@@ -25,7 +25,7 @@ from tenacity import (
 class Neo4JStorage(BaseGraphStorage):
     @staticmethod
     def load_nx_graph(file_name):
-        print("no preloading of graph with neo4j in production")
+        logger.info("no preloading of graph with neo4j in production")
 
     def __init__(self, namespace, global_config, embedding_func):
         super().__init__(
@@ -58,7 +58,7 @@ class Neo4JStorage(BaseGraphStorage):
             await self._driver.close()
 
     async def index_done_callback(self):
-        print("KG successfully indexed.")
+        logger.info("KG successfully indexed.")
 
     async def has_node(self, node_id: str) -> bool:
         entity_name_label = node_id.strip('"')
@@ -295,4 +295,4 @@ class Neo4JStorage(BaseGraphStorage):
             raise
 
     async def _node2vec_embed(self):
-        print("Implemented but never called.")
+        logger.debug("Implemented but never called.")

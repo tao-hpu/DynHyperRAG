@@ -77,8 +77,8 @@ def locate_json_string_body_from_string(content: str) -> Union[str, None]:
             maybe_json_str = maybe_json_str.replace("'", '"')
             # json.loads(maybe_json_str) # don't check here, cannot validate schema after all
             return maybe_json_str
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"Failed to locate JSON string: {e}")
         # try:
         #     content = (
         #         content.replace(kw_prompt[:-1], "")
@@ -238,9 +238,9 @@ def xml_to_json(xml_file):
         tree = ET.parse(xml_file)
         root = tree.getroot()
 
-        # Print the root element's tag and attributes to confirm the file has been correctly loaded
-        print(f"Root element: {root.tag}")
-        print(f"Root attributes: {root.attrib}")
+        # Log the root element's tag and attributes to confirm the file has been correctly loaded
+        logger.debug(f"Root element: {root.tag}")
+        logger.debug(f"Root attributes: {root.attrib}")
 
         data = {"nodes": [], "edges": []}
 
@@ -281,15 +281,15 @@ def xml_to_json(xml_file):
             }
             data["edges"].append(edge_data)
 
-        # Print the number of nodes and edges found
-        print(f"Found {len(data['nodes'])} nodes and {len(data['edges'])} edges")
+        # Log the number of nodes and edges found
+        logger.debug(f"Found {len(data['nodes'])} nodes and {len(data['edges'])} edges")
 
         return data
     except ET.ParseError as e:
-        print(f"Error parsing XML file: {e}")
+        logger.error(f"Error parsing XML file: {e}")
         return None
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {e}")
         return None
 
 

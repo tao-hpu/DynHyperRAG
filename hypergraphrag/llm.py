@@ -59,11 +59,13 @@ async def openai_complete_if_cache(
     model,
     prompt,
     system_prompt=None,
-    history_messages=[],
+    history_messages=None,
     base_url=None,
     api_key=None,
     **kwargs,
 ) -> str:
+    if history_messages is None:
+        history_messages = []
     if api_key:
         os.environ["OPENAI_API_KEY"] = api_key
 
@@ -120,12 +122,14 @@ async def azure_openai_complete_if_cache(
     model,
     prompt,
     system_prompt=None,
-    history_messages=[],
+    history_messages=None,
     base_url=None,
     api_key=None,
     api_version=None,
     **kwargs,
 ):
+    if history_messages is None:
+        history_messages = []
     if api_key:
         os.environ["AZURE_OPENAI_API_KEY"] = api_key
     if base_url:
@@ -167,12 +171,14 @@ async def bedrock_complete_if_cache(
     model,
     prompt,
     system_prompt=None,
-    history_messages=[],
+    history_messages=None,
     aws_access_key_id=None,
     aws_secret_access_key=None,
     aws_session_token=None,
     **kwargs,
 ) -> str:
+    if history_messages is None:
+        history_messages = []
     os.environ["AWS_ACCESS_KEY_ID"] = os.environ.get(
         "AWS_ACCESS_KEY_ID", aws_access_key_id
     )
@@ -249,9 +255,11 @@ async def hf_model_if_cache(
     model,
     prompt,
     system_prompt=None,
-    history_messages=[],
+    history_messages=None,
     **kwargs,
 ) -> str:
+    if history_messages is None:
+        history_messages = []
     model_name = model
     hf_model, hf_tokenizer = initialize_hf_model(model_name)
     messages = []
@@ -316,9 +324,11 @@ async def ollama_model_if_cache(
     model,
     prompt,
     system_prompt=None,
-    history_messages=[],
+    history_messages=None,
     **kwargs,
 ) -> Union[str, AsyncIterator[str]]:
+    if history_messages is None:
+        history_messages = []
     stream = True if kwargs.get("stream") else False
     kwargs.pop("max_tokens", None)
     # kwargs.pop("response_format", None) # allow json
@@ -380,7 +390,7 @@ async def lmdeploy_model_if_cache(
     model,
     prompt,
     system_prompt=None,
-    history_messages=[],
+    history_messages=None,
     chat_template=None,
     model_format="hf",
     quant_policy=0,
@@ -438,6 +448,9 @@ async def lmdeploy_model_if_cache(
         do_sample = True
         gen_params.update(do_sample=do_sample)
 
+    if history_messages is None:
+        history_messages = []
+
     lmdeploy_pipe = initialize_lmdeploy_pipeline(
         model=model,
         tp=tp,
@@ -478,7 +491,7 @@ class GPTKeywordExtractionFormat(BaseModel):
 
 
 async def openai_complete(
-    prompt, system_prompt=None, history_messages=[], keyword_extraction=False, **kwargs
+    prompt, system_prompt=None, history_messages=None, keyword_extraction=False, **kwargs
 ) -> Union[str, AsyncIterator[str]]:
     keyword_extraction = kwargs.pop("keyword_extraction", None)
     if keyword_extraction:
@@ -494,7 +507,7 @@ async def openai_complete(
 
 
 async def gpt_4o_complete(
-    prompt, system_prompt=None, history_messages=[], keyword_extraction=False, **kwargs
+    prompt, system_prompt=None, history_messages=None, keyword_extraction=False, **kwargs
 ) -> str:
     keyword_extraction = kwargs.pop("keyword_extraction", None)
     if keyword_extraction:
@@ -509,7 +522,7 @@ async def gpt_4o_complete(
 
 
 async def gpt_4o_mini_complete(
-    prompt, system_prompt=None, history_messages=[], keyword_extraction=False, **kwargs
+    prompt, system_prompt=None, history_messages=None, keyword_extraction=False, **kwargs
 ) -> str:
     keyword_extraction = kwargs.pop("keyword_extraction", None)
     if keyword_extraction:
@@ -524,7 +537,7 @@ async def gpt_4o_mini_complete(
 
 
 async def nvidia_openai_complete(
-    prompt, system_prompt=None, history_messages=[], keyword_extraction=False, **kwargs
+    prompt, system_prompt=None, history_messages=None, keyword_extraction=False, **kwargs
 ) -> str:
     keyword_extraction = kwargs.pop("keyword_extraction", None)
     result = await openai_complete_if_cache(
@@ -541,7 +554,7 @@ async def nvidia_openai_complete(
 
 
 async def azure_openai_complete(
-    prompt, system_prompt=None, history_messages=[], keyword_extraction=False, **kwargs
+    prompt, system_prompt=None, history_messages=None, keyword_extraction=False, **kwargs
 ) -> str:
     keyword_extraction = kwargs.pop("keyword_extraction", None)
     result = await azure_openai_complete_if_cache(
@@ -557,7 +570,7 @@ async def azure_openai_complete(
 
 
 async def bedrock_complete(
-    prompt, system_prompt=None, history_messages=[], keyword_extraction=False, **kwargs
+    prompt, system_prompt=None, history_messages=None, keyword_extraction=False, **kwargs
 ) -> str:
     keyword_extraction = kwargs.pop("keyword_extraction", None)
     result = await bedrock_complete_if_cache(
@@ -573,7 +586,7 @@ async def bedrock_complete(
 
 
 async def hf_model_complete(
-    prompt, system_prompt=None, history_messages=[], keyword_extraction=False, **kwargs
+    prompt, system_prompt=None, history_messages=None, keyword_extraction=False, **kwargs
 ) -> str:
     keyword_extraction = kwargs.pop("keyword_extraction", None)
     model_name = kwargs["hashing_kv"].global_config["llm_model_name"]
@@ -590,7 +603,7 @@ async def hf_model_complete(
 
 
 async def ollama_model_complete(
-    prompt, system_prompt=None, history_messages=[], keyword_extraction=False, **kwargs
+    prompt, system_prompt=None, history_messages=None, keyword_extraction=False, **kwargs
 ) -> Union[str, AsyncIterator[str]]:
     keyword_extraction = kwargs.pop("keyword_extraction", None)
     if keyword_extraction:
@@ -615,9 +628,11 @@ async def zhipu_complete_if_cache(
     model: str = "glm-4-flashx",  # The most cost/performance balance model in glm-4 series
     api_key: Optional[str] = None,
     system_prompt: Optional[str] = None,
-    history_messages: List[Dict[str, str]] = [],
+    history_messages: List[Dict[str, str]] = None,
     **kwargs,
 ) -> str:
+    if history_messages is None:
+        history_messages = []
     # dynamically load ZhipuAI
     try:
         from zhipuai import ZhipuAI
@@ -658,7 +673,7 @@ async def zhipu_complete_if_cache(
 
 
 async def zhipu_complete(
-    prompt, system_prompt=None, history_messages=[], keyword_extraction=False, **kwargs
+    prompt, system_prompt=None, history_messages=None, keyword_extraction=False, **kwargs
 ):
     # Pop keyword_extraction from kwargs to avoid passing it to zhipu_complete_if_cache
     keyword_extraction = kwargs.pop("keyword_extraction", None)
@@ -1102,7 +1117,7 @@ class MultiModel:
         return self._models[self._current_model]
 
     async def llm_model_func(
-        self, prompt, system_prompt=None, history_messages=[], **kwargs
+        self, prompt, system_prompt=None, history_messages=None, **kwargs
     ) -> str:
         kwargs.pop("model", None)  # stop from overwriting the custom model name
         kwargs.pop("keyword_extraction", None)

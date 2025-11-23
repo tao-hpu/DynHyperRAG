@@ -6,10 +6,13 @@
 """
 
 import asyncio
+import logging
 import numpy as np
 from typing import Dict, List, Optional, Callable, Tuple
 from .features import GraphFeatureExtractor, normalize_features
 from .coherence import CoherenceMetric
+
+logger = logging.getLogger("hypergraphrag")
 
 
 class QualityScorer:
@@ -50,7 +53,7 @@ class QualityScorer:
         # 验证权重和为1
         weight_sum = sum(self.feature_weights.values())
         if abs(weight_sum - 1.0) > 0.01:
-            print(f"警告：特征权重和为 {weight_sum}，已归一化")
+            logger.warning(f"Feature weights sum to {weight_sum}, normalizing")
             self.feature_weights = {
                 k: v / weight_sum for k, v in self.feature_weights.items()
             }
@@ -88,7 +91,7 @@ class QualityScorer:
             }
             
         except Exception as e:
-            print(f"计算质量分数失败 {hyperedge_id}: {e}")
+            logger.error(f"Failed to compute quality score for {hyperedge_id}: {e}")
             return {
                 'quality_score': 0.5,
                 'features': {},
@@ -117,16 +120,16 @@ class QualityScorer:
         
         # 处理异常
         if isinstance(graph_features, Exception):
-            print(f"提取图特征失败: {graph_features}")
+            logger.error(f"Failed to extract graph features: {graph_features}")
             graph_features = {
                 'degree_centrality': 0.5,
                 'betweenness': 0.5,
                 'clustering': 0.5,
                 'text_quality': 0.5
             }
-        
+
         if isinstance(coherence, Exception):
-            print(f"计算一致性失败: {coherence}")
+            logger.error(f"Failed to compute coherence: {coherence}")
             coherence = 0.5
         
         # 合并所有特征
@@ -177,7 +180,7 @@ class QualityScorer:
             score = self.supervised_model.predict([feature_vector])[0]
             return max(0.0, min(1.0, float(score)))
         except Exception as e:
-            print(f"有监督预测失败: {e}")
+            logger.error(f"Supervised prediction failed: {e}")
             return self._compute_unsupervised_score(features)
     
     def _features_to_vector(self, features: Dict[str, float]) -> np.ndarray:
@@ -222,7 +225,7 @@ class QualityScorer:
                     for he_id in hyperedge_ids
                 ], desc="计算质量分数")
             except ImportError:
-                print("警告：tqdm未安装，无法显示进度条")
+                logger.warning("tqdm not installed, cannot show progress bar")
                 results = await asyncio.gather(*[
                     self.compute_quality_score(he_id)
                     for he_id in hyperedge_ids
@@ -263,7 +266,7 @@ class QualityScorer:
         """
         try:
             # 1. 提取特征
-            print(f"提取 {len(hyperedge_ids)} 个超边的特征...")
+            logger.info(f"Extracting features from {len(hyperedge_ids)} hyperedges...")
             quality_results = await self.batch_compute_quality(hyperedge_ids)
             
             # 2. 构建训练数据
@@ -287,8 +290,8 @@ class QualityScorer:
             
             X = np.array(X)
             y = np.array(y)
-            
-            print(f"训练数据：{len(X)} 个样本")
+
+            logger.info(f"Training data: {len(X)} samples")
             
             # 3. 训练模型
             if model_type == 'linear':
@@ -387,7 +390,7 @@ class QualityScorer:
         # 批量更新
         if update_tasks:
             await asyncio.gather(*update_tasks)
-            print(f"已更新 {len(update_tasks)} 个超边的质量分数")
+            logger.info(f"Updated quality scores for {len(update_tasks)} hyperedges")
     
     def get_feature_weights(self) -> Dict[str, float]:
         """获取当前特征权重"""

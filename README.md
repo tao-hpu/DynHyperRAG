@@ -55,8 +55,6 @@ DynHyperRAG extends static HyperGraphRAG with three major innovations:
 
 📖 Full thesis overview: [docs/THESIS_OVERVIEW.md](docs/THESIS_OVERVIEW.md)
 
-📋 Project specs: [.kiro/specs/dynhyperrag-quality-aware/](.kiro/specs/dynhyperrag-quality-aware/)
-
 ### Research Timeline (18 Weeks)
 
 | Phase | Weeks | Deliverables |
@@ -301,12 +299,6 @@ HyperGraphRAG/
 │   ├── architecture.md      # Architecture & design
 │   └── visualization/       # Visualization documentation
 │
-├── .kiro/specs/             # 🆕 Research specifications
-│   └── dynhyperrag-quality-aware/
-│       ├── requirements.md  # Research requirements
-│       ├── design.md        # System design
-│       └── tasks.md         # Implementation tasks
-│
 ├── expr/                    # Experiment data
 │   ├── example/             # Original medical dataset
 │   ├── cail2019/            # 🆕 Legal dataset (planned)
@@ -483,7 +475,6 @@ If you use this fork or DynHyperRAG in your research, please cite:
 
 **Core Algorithm Developer**: [Hao Liu](https://haoliu923.github.io) (HaoLiu923)
 - Homepage: [haoliu923.github.io](https://haoliu923.github.io)
-- ORCID: [0009-0001-9948-8409](https://orcid.org/0009-0001-9948-8409)
 
 **Programming & Code Review**: [Tao An](https://tao-hpu.github.io)
 - Homepage: [tao-hpu.github.io](https://tao-hpu.github.io)
@@ -537,11 +528,10 @@ This fork maintains the same license as the original repository. Please refer to
 - **Original Author**: [Haoran Luo](mailto:haoran.luo@ieee.org)
 
 ### This Fork & DynHyperRAG Research
-- **Fork Repository**: [HaoLiu923/DynHyperRAG](https://github.com/HaoLiu923/DynHyperRAG)
-- **Development Repository**: [tao-hpu/HyperGraphRAG](https://github.com/tao-hpu/HyperGraphRAG)
+- **Primary Repository**: [HaoLiu923/DynHyperRAG](https://github.com/HaoLiu923/DynHyperRAG) (thesis project)
+- **Collaborative Development**: [tao-hpu/HyperGraphRAG](https://github.com/tao-hpu/HyperGraphRAG) (code review & sync)
 - **Thesis Overview**: [docs/THESIS_OVERVIEW.md](docs/THESIS_OVERVIEW.md)
-- **Research Specs**: [.kiro/specs/dynhyperrag-quality-aware/](.kiro/specs/dynhyperrag-quality-aware/)
-- **Core Algorithm**: [Hao Liu](https://haoliu923.github.io) | ORCID: [0009-0001-9948-8409](https://orcid.org/0009-0001-9948-8409)
+- **Core Algorithm**: [Hao Liu](https://haoliu923.github.io)
 - **Programming & Review**: [Tao An](https://tao-hpu.github.io) | ORCID: [0009-0006-2933-0320](https://orcid.org/0009-0006-2933-0320)
 
 ### Related Projects
